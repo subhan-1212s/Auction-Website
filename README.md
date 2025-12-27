@@ -1,4 +1,4 @@
-# 🏆 Smart Auction - Elite Global Marketplace
+# 🏆 Auction Website - Elite Global Marketplace
 
 Smart Auction is a premium, full-stack MERN platform designed for elite collectors and sellers. It features real-time bidding, secure payment integrations, and a sophisticated user dashboard.
 
@@ -32,8 +32,8 @@ Smart Auction is a premium, full-stack MERN platform designed for elite collecto
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/subhan-1212s/smart-auction.git
-   cd smart-auction
+   git clone https://github.com/subhan-1212s/Auction-Website.git
+   cd Auction-Website
    ```
 
 2. **Setup Server**
