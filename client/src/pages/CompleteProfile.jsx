@@ -6,7 +6,7 @@ import AuthContext from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
 export default function CompleteProfile() {
-    const { user, updateProfile } = useContext(AuthContext);
+    const { user, updateProfile, skipProfile } = useContext(AuthContext);
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
 
@@ -163,13 +163,34 @@ export default function CompleteProfile() {
                                 />
                             </div>
 
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full py-4 bg-[#1A1A1A] text-white rounded-xl font-black uppercase text-xs tracking-[0.2em] shadow-xl hover:bg-[#D4AF37] hover:text-[#1A1A1A] transition-all duration-500 flex items-center justify-center gap-2 group disabled:opacity-50"
-                            >
-                                {loading ? 'Securing...' : <>Save & Continue <FiArrowRight className="group-hover:translate-x-1 transition-transform" /></>}
-                            </button>
+                            <div className="flex gap-4">
+                                <button
+                                    type="button"
+                                    onClick={async () => {
+                                        setLoading(true);
+                                        try {
+                                            await skipProfile();
+                                            toast.success('You can complete your profile later in settings.');
+                                            navigate('/dashboard');
+                                        } catch (err) {
+                                            toast.error('Failed to skip');
+                                        } finally {
+                                            setLoading(false);
+                                        }
+                                    }}
+                                    disabled={loading}
+                                    className="flex-1 py-4 bg-gray-100 text-gray-600 rounded-xl font-black uppercase text-xs tracking-[0.2em] hover:bg-gray-200 transition-all duration-300 disabled:opacity-50"
+                                >
+                                    Skip for now
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="flex-[1.5] py-4 bg-[#1A1A1A] text-white rounded-xl font-black uppercase text-xs tracking-[0.2em] shadow-xl hover:bg-[#D4AF37] hover:text-[#1A1A1A] transition-all duration-500 flex items-center justify-center gap-2 group disabled:opacity-50"
+                                >
+                                    {loading ? 'Securing...' : <>Save & Continue <FiArrowRight className="group-hover:translate-x-1 transition-transform" /></>}
+                                </button>
+                            </div>
                         </form>
                     </div>
                 </div>

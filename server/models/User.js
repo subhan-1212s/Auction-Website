@@ -28,7 +28,8 @@ const userSchema = new mongoose.Schema({
   resetToken: String,
   resetTokenExpiry: Date,
   otp: String,
-  otpExpires: Date
+  otpExpires: Date,
+  hasSeenProfilePrompt: { type: Boolean, default: false }
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

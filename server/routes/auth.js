@@ -108,6 +108,7 @@ router.post('/verify-otp', async (req, res, next) => {
     
     // Check if profile is complete (needs at least one address and phone)
     const isProfileComplete = !!(user.phone && user.addresses && user.addresses.length > 0);
+    const needsProfileUpdate = !isProfileComplete && !user.hasSeenProfilePrompt;
     
     res.json({ 
       success: true,
@@ -121,7 +122,7 @@ router.post('/verify-otp', async (req, res, next) => {
         isApproved: user.isApproved,
         avatar: user.avatar,
         address: user.address,
-        needsProfileUpdate: !isProfileComplete
+        needsProfileUpdate
       } 
     });
   } catch (err) {
@@ -134,12 +135,13 @@ router.get('/me', auth, async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id).populate('watchlist', 'name currentBid images status');
     const isProfileComplete = !!(user.phone && user.addresses && user.addresses.length > 0);
+    const needsProfileUpdate = !isProfileComplete && !user.hasSeenProfilePrompt;
     
     res.json({ 
       success: true, 
       data: {
         ...user.toObject(),
-        needsProfileUpdate: !isProfileComplete
+        needsProfileUpdate
       } 
     });
   } catch (err) {
@@ -154,6 +156,18 @@ router.put('/profile', auth, async (req, res, next) => {
       new: true,
       runValidators: true
     });
+    res.json({ success: true, data: user });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Mark Profile Prompt as Seen
+router.post('/profile/mark-prompt-seen', auth, async (req, res, next) => {
+  try {
+    const user = await User.findByIdAndUpdate(req.user.id, { 
+      $set: { hasSeenProfilePrompt: true } 
+    }, { new: true });
     res.json({ success: true, data: user });
   } catch (err) {
     next(err);

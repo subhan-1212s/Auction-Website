@@ -1,15 +1,20 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import AuthContext from '../context/AuthContext';
 import toast from 'react-hot-toast';
-import { FiUser, FiMail, FiLock, FiArrowRight, FiCheckCircle } from 'react-icons/fi';
+import { FiUser, FiMail, FiLock, FiArrowRight, FiCheckCircle, FiEye, FiEyeOff } from 'react-icons/fi';
 
 export default function Register() {
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { register } = useContext(AuthContext);
+  const [showPassword, setShowPassword] = useState(false);
+  const { user, register } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) navigate('/dashboard');
+  }, [user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -90,13 +95,20 @@ export default function Register() {
               <div className="relative group">
                 <FiLock className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   required
-                  className="w-full pl-12 pr-6 py-4 rounded-2xl border border-gray-100 bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 transition-all font-bold text-gray-900 outline-none"
+                  className="w-full pl-12 pr-12 py-4 rounded-2xl border border-gray-100 bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 transition-all font-bold text-gray-900 outline-none"
                   placeholder="Minimum 8 characters"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600 transition-colors"
+                >
+                  {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                </button>
               </div>
             </div>
 
