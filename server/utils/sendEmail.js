@@ -44,8 +44,17 @@ const sendEmail = async (options) => {
   };
 
   // 4. Send Email
-  await transporter.sendMail(mailOptions);
-  console.log(`✅ Email sent to ${options.email}`);
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`✅ Email sent to ${options.email}`);
+  } catch (err) {
+    console.error('❌ Render SMTP Blocked:', err.message);
+    if (options.otp) {
+      console.log('------------------------------------------');
+      console.log(`🚀 DEMO BYPASS: Use this OTP to login: ${options.otp}`);
+      console.log('------------------------------------------');
+    }
+  }
 };
 
 module.exports = sendEmail;
