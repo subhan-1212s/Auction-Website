@@ -14,7 +14,9 @@ const sendEmail = async (options) => {
 
   // 2. Create Transporter
   const transporter = nodemailer.createTransport({
-    service: 'gmail', // or use host/port for other providers
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true, // Use SSL
     auth: {
       user: process.env.SMTP_EMAIL,
       pass: process.env.SMTP_PASSWORD,
