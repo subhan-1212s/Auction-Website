@@ -1,35 +1,30 @@
-const nodemailer = require('nodemailer');
+const axios = require('axios');
 
 const sendEmail = async (options) => {
-  // 1. Check if SMTP credentials exist; if not, use Dev Mode (log to console)
-  if (!process.env.SMTP_EMAIL || !process.env.SMTP_PASSWORD) {
-    console.log('⚠️  SMTP Credentials not found in .env');
-    console.log('📨 [DEV MODE] Email Simulation');
-    console.log(`   To:      ${options.email}`);
-    console.log(`   Subject: ${options.subject}`);
-    console.log(`   Message: ${options.message}`);
-    console.log('   (To send real emails, add SMTP_EMAIL and SMTP_PASSWORD to .env)');
+  const apiKey = process.env.BREVO_API_KEY;
+  const senderEmail = process.env.BREVO_SENDER_EMAIL || 'mohamedsubhan155@gmail.com';
+
+  // Always log OTP for Demo Bypass (Safe fallback)
+  if (options.otp) {
+    console.log('------------------------------------------');
+    console.log(`🚀 AUTHENTICATION LOG: OTP for ${options.email} is ${options.otp}`);
+    console.log('------------------------------------------');
+  }
+
+  // 1. Check if Brevo API Key exists
+  if (!apiKey) {
+    console.log('⚠️  BREVO_API_KEY not found. Real emails will not be sent.');
+    console.log('📨 [DEV MODE] Email Content:');
+    console.log(`   To: ${options.email} | Subject: ${options.subject}`);
     return;
   }
 
-  // 2. Create Transporter
-  const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true, // Use SSL
-    auth: {
-      user: process.env.SMTP_EMAIL,
-      pass: process.env.SMTP_PASSWORD,
-    },
-  });
-
-  // 3. Define Email Options
-  const mailOptions = {
-    from: `"Smart Auction" <${process.env.SMTP_EMAIL}>`,
-    to: options.email,
+  // 2. Prepare Brevo API Payload
+  const data = {
+    sender: { name: 'Smart Auction', email: senderEmail },
+    to: [{ email: options.email }],
     subject: options.subject,
-    text: options.message || options.text,
-    html: options.html || `
+    htmlContent: options.html || `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
         <h2 style="color: #1a1a1a; border-bottom: 2px solid #D4AF37; padding-bottom: 10px;">${options.subject}</h2>
         <p style="font-size: 16px; color: #333;">${options.message}</p>
@@ -43,17 +38,17 @@ const sendEmail = async (options) => {
     `
   };
 
-  // 4. Send Email
+  // 3. Send via HTTP API (Bypasses Render SMTP Block)
   try {
-    await transporter.sendMail(mailOptions);
-    console.log(`✅ Email sent to ${options.email}`);
+    await axios.post('https://api.brevo.com/v3/smtp/email', data, {
+      headers: {
+        'api-key': apiKey,
+        'Content-Type': 'application/json'
+      }
+    });
+    console.log(`✅ Real Email sent via Brevo to ${options.email}`);
   } catch (err) {
-    console.error('❌ Render SMTP Blocked:', err.message);
-    if (options.otp) {
-      console.log('------------------------------------------');
-      console.log(`🚀 DEMO BYPASS: Use this OTP to login: ${options.otp}`);
-      console.log('------------------------------------------');
-    }
+    console.error('❌ Brevo API Error:', err.response?.data || err.message);
   }
 };
 
