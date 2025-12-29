@@ -55,20 +55,14 @@ router.post('/login', async (req, res, next) => {
     user.otpExpires = otpExpires;
     await user.save();
 
-    // 5. Send OTP Email
+    // 5. Send OTP Email (Asynchronous - don't wait for it to finish)
     const sendEmail = require('../utils/sendEmail');
-    try {
-      await sendEmail({
-        email: user.email,
-        subject: 'Your Smart Auction Login OTP',
-        message: `Your OTP is ${otp}`,
-        otp: otp
-      });
-    } catch (err) {
-      console.error('Email send failed:', err);
-      // In dev, we might still want to allow login if email fails? 
-      // No, for security we should fail or rely on console log.
-    }
+    sendEmail({
+      email: user.email,
+      subject: 'Your Smart Auction Login OTP',
+      message: `Your OTP is ${otp}`,
+      otp: otp
+    }).catch(err => console.error('Background Email Failed:', err));
 
     // 6. Response (Don't send token yet!)
     res.json({ 
