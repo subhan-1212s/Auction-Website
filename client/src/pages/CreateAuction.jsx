@@ -1,14 +1,23 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiUploadCloud, FiDollarSign, FiClock, FiTag, FiType, FiPlus, FiX, FiInfo, FiCheckCircle } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { addMinutes, addHours, addDays } from 'date-fns';
+import AuthContext from '../context/AuthContext';
 
 export default function CreateAuction() {
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
   const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    if (user && !user.isApproved && user.role !== 'admin') {
+      toast.error('Your seller account is pending approval.');
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState([]);
   const [previews, setPreviews] = useState([]);

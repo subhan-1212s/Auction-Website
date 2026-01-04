@@ -5,22 +5,31 @@ const { auth } = require('../middleware/auth');
 const ErrorResponse = require('../utils/errorResponse');
 const router = express.Router();
 
-// Request to become seller (Instant Approval for Demo)
+// Request to become seller
 router.post('/', auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    user.role = 'seller';
-    user.isApproved = true;
-    await user.save();
+    // Check if a request already exists
+    const existingRequest = await SellerRequest.findOne({ user: req.user.id, status: 'pending' });
+    if (existingRequest) {
+      return res.status(400).json({ message: 'You already have a pending seller request.' });
+    }
+
+    // Create new request
+    const request = new SellerRequest({
+      user: req.user.id
+    });
+    await request.save();
 
     res.status(200).json({ 
       success: true, 
-      message: 'Seller account activated! You can now start listing.',
-      user: user
+      message: 'Seller request submitted! Please wait for admin approval.',
+      data: request
     });
   } catch (error) {
+    console.error('Seller Request Error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });

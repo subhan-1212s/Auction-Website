@@ -181,30 +181,38 @@ export default function Dashboard() {
           {user.role === 'user' && (
             <div className="mb-8 bg-gradient-to-r from-blue-600 to-blue-800 rounded-2xl p-6 md:p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl shadow-blue-500/20">
               <div className="text-center md:text-left">
-                <h3 className="text-xl md:text-2xl font-black mb-2">Ready to sell your premium assets?</h3>
-                <p className="text-blue-100 font-medium text-sm md:text-base opacity-90">Join our elite seller community and reach thousands of collectors worldwide.</p>
+                <h3 className="text-xl md:text-2xl font-black mb-2">
+                  {user.isApproved ? 'You are an approved seller!' : 'Ready to sell your premium assets?'}
+                </h3>
+                <p className="text-blue-100 font-medium text-sm md:text-base opacity-90">
+                  {user.isApproved
+                    ? 'Start listing your products and reach thousands of buyers.'
+                    : 'Join our elite seller community and reach thousands of collectors worldwide.'}
+                </p>
               </div>
-              <button
-                disabled={requesting}
-                onClick={async () => {
-                  setRequesting(true);
-                  try {
-                    await requestSellerRole();
-                    toast.success('Seller account activated! Redirecting...');
-                    setTimeout(() => {
-                      setActiveTab('selling');
-                      navigate('/create');
-                    }, 1500);
-                  } catch (err) {
-                    toast.error(err.response?.data?.message || 'Failed to activate seller account');
-                  } finally {
-                    setRequesting(false);
-                  }
-                }}
-                className="bg-white text-blue-700 px-8 py-3 rounded-xl font-black uppercase text-xs tracking-widest hover:bg-blue-50 transition-all shadow-lg whitespace-nowrap disabled:opacity-50 active:scale-95"
-              >
-                {requesting ? 'Activating...' : 'Start Selling Now'}
-              </button>
+              {user.isApproved ? (
+                <Link to="/create" className="bg-white text-blue-700 px-8 py-3 rounded-xl font-black uppercase text-xs tracking-widest hover:bg-blue-50 transition-all shadow-lg whitespace-nowrap">
+                  Start Listing Now
+                </Link>
+              ) : (
+                <button
+                  disabled={requesting}
+                  onClick={async () => {
+                    setRequesting(true);
+                    try {
+                      await requestSellerRole();
+                      toast.success('Seller request sent! Please wait for admin approval.');
+                    } catch (err) {
+                      toast.error(err.response?.data?.message || 'Failed to send seller request');
+                    } finally {
+                      setRequesting(false);
+                    }
+                  }}
+                  className="bg-white text-blue-700 px-8 py-3 rounded-xl font-black uppercase text-xs tracking-widest hover:bg-blue-50 transition-all shadow-lg whitespace-nowrap disabled:opacity-50 active:scale-95"
+                >
+                  {requesting ? 'Sending...' : 'Request Seller Access'}
+                </button>
+              )}
             </div>
           )}
 

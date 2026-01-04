@@ -422,6 +422,16 @@ export default function Navbar() {
               <Link key={item.label} to={item.path} onClick={() => setMobileMenuOpen(false)} className="hover:text-[#D4AF37] transition-colors border-b border-gray-50 pb-2">{item.label}</Link>
             ))}
 
+            {user?.role === 'admin' && (
+              <Link
+                to="/admin"
+                onClick={() => setMobileMenuOpen(false)}
+                className="hover:text-blue-600 transition-colors border-b border-blue-50 pb-2 flex items-center gap-2 text-blue-600 font-bold"
+              >
+                <div className="w-2 h-2 rounded-full bg-blue-600"></div> Admin Panel
+              </Link>
+            )}
+
             <div className="mt-4 pt-4 border-t border-gray-100">
               <p className="text-[10px] uppercase text-gray-400 tracking-widest font-black mb-4">Categories</p>
               <div className="grid grid-cols-1 gap-2">

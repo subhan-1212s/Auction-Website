@@ -144,11 +144,7 @@ export const AuthProvider = ({ children }) => {
 
   const requestSellerRole = async () => {
     const res = await axios.post('/api/seller-requests')
-    if (res.data.success && res.data.user) {
-      localStorage.setItem('user', JSON.stringify(res.data.user));
-      setUser(res.data.user);
-      return res.data.user;
-    }
+    return res.data;
   }
 
   const skipProfile = async () => {

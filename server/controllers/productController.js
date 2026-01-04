@@ -114,6 +114,11 @@ exports.getProduct = async (req, res, next) => {
 // @access  Private/Seller
 exports.createProduct = async (req, res, next) => {
   try {
+    // Check if user is approved to sell
+    if (!req.user.isApproved && req.user.role !== 'admin') {
+      return next(new ErrorResponse('Your seller account is pending approval. You cannot list products yet.', 403));
+    }
+
     // Add user to req.body
     req.body.seller = req.user.id;
 
