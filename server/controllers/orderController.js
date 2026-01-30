@@ -59,9 +59,22 @@ exports.updateOrderStatus = async (req, res, next) => {
             return next(new ErrorResponse('Order not found', 404));
         }
 
-        // Only seller or admin can update status
-        if (order.seller.toString() !== req.user.id && req.user.role !== 'admin') {
-            return next(new ErrorResponse('Not authorized to update this order', 403));
+        // Escrow Safety Logic:
+        // 1. Seller can only mark as 'shipped' (or 'paid' if manual)
+        // 2. Buyer can ONLY mark as 'delivered' (Escrow)
+        
+        if (req.user.role === 'admin') {
+            // Admin can do anything
+        } else if (status === 'delivered') {
+            // Only BUYER can confirm delivery
+            if (order.buyer.toString() !== req.user.id) {
+                return next(new ErrorResponse('Only the buyer can confirm receipt of this order', 403));
+            }
+        } else {
+            // Seller handles 'shipped', 'cancelled', etc.
+            if (order.seller.toString() !== req.user.id) {
+                return next(new ErrorResponse('Not authorized to update this order', 403));
+            }
         }
 
         order.status = status;

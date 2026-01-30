@@ -72,31 +72,43 @@ export default function Dashboard() {
   };
 
   const fetchDashboardData = async () => {
-    try {
-      const [statsRes, bidsRes, ordersRes, notifRes] = await Promise.all([
-        axios.get('/api/analytics/user-stats'),
-        axios.get('/api/bids/my-bids'),
-        axios.get('/api/orders/my-orders'),
-        axios.get('/api/notifications')
-      ]);
-      setStats(statsRes.data.data);
-      setBids(bidsRes.data.data || []);
-      setOrders(ordersRes.data.data || []);
-      setNotifications(notifRes.data || []);
+    // Progressive Loading: Fire all requests independently
+    setLoading(true);
 
-      if (user.role === 'seller' || user.role === 'admin') {
-        const [listingsRes, soldRes] = await Promise.all([
-          axios.get('/api/products/me'),
-          axios.get('/api/orders/sold-items')
-        ]);
-        setMyListings(listingsRes.data.data || []);
-        setSoldOrders(soldRes.data.data || []);
-      }
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-    } finally {
-      setLoading(false);
+    // 1. Critical Stats (Fastest, most important)
+    axios.get('/api/analytics/user-stats')
+      .then(res => setStats(res.data.data))
+      .catch(err => console.error('Stats error:', err));
+
+    // 2. User Data
+    axios.get('/api/bids/my-bids')
+      .then(res => setBids(res.data.data || []))
+      .catch(err => console.error('Bids error:', err));
+
+    axios.get('/api/orders/my-orders')
+      .then(res => setOrders(res.data.data || []))
+      .catch(err => console.error('Orders error:', err));
+
+    // 3. Notifications (Can be slower)
+    axios.get('/api/notifications')
+      .then(res => setNotifications(res.data || []))
+      .catch(err => console.error('Notifications error:', err));
+
+    // 4. Seller Data
+    if (user.role === 'seller' || user.role === 'admin') {
+      axios.get('/api/products/me')
+        .then(res => setMyListings(res.data.data || []))
+        .catch(err => console.error('Listings error:', err));
+
+      axios.get('/api/orders/sold-items')
+        .then(res => setSoldOrders(res.data.data || []))
+        .catch(err => console.error('Sold items error:', err));
     }
+
+    // Unblock UI immediately to allow partial rendering
+    // (If 'loading' state controls a global spinner, this might need adjustment, 
+    // but based on code analysis, individual sections render their data).
+    setLoading(false);
   };
 
   if (!user) return (
@@ -313,13 +325,33 @@ export default function Dashboard() {
                           </div>
                         </div>
                       </div>
-                      <div className="flex gap-2">
-                        <a href={`mailto:${order.seller?.email}`} className="p-2.5 bg-gray-50 text-gray-700 rounded-xl hover:bg-blue-600 hover:text-white transition-all" title="Email Seller">
-                          <FiBell size={14} />
-                        </a>
-                        <Link to={`/invoice/${order.product?._id}`} className="p-2.5 bg-[#1A1A1A] text-white rounded-xl hover:bg-blue-600 transition-all">
-                          <FiArrowRight size={16} />
+                      <div className="flex flex-col gap-2 items-end">
+                        <Link to={`/invoice/${order.product?._id}`} className="p-2.5 bg-[#1A1A1A] text-white rounded-xl hover:bg-blue-600 transition-all flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest">
+                          <FiArrowRight size={14} /> Invoice
                         </Link>
+
+                        {/* Escrow Action for Buyer */}
+                        {order.status === 'shipped' && (
+                          <button
+                            onClick={async () => {
+                              try {
+                                if (window.confirm('Have you physically received this item? This will release the funds to the seller.')) {
+                                  await axios.put(`/api/orders/${order._id}/status`, { status: 'delivered' });
+                                  toast.success('Order confirmed! Funds released.');
+                                  fetchDashboardData();
+                                }
+                              } catch (err) {
+                                toast.error('Failed to confirm delivery');
+                              }
+                            }}
+                            className="bg-green-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-green-700 shadow-lg shadow-green-500/20 flex items-center gap-2"
+                          >
+                            <FiCheckCircle /> Mark as Received
+                          </button>
+                        )}
+                        {order.status === 'delivered' && (
+                          <span className="text-green-600 text-[10px] font-black uppercase flex items-center gap-1"><FiCheckCircle /> Completed</span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -375,10 +407,10 @@ export default function Dashboard() {
 
                     <div className="mt-6 flex flex-wrap gap-2">
                       <p className="w-full text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Update Status</p>
-                      {['paid', 'shipped', 'delivered'].map(status => (
+                      {['paid', 'shipped'].map(status => (
                         <button
                           key={status}
-                          disabled={order.status === status}
+                          disabled={order.status === status || order.status === 'delivered'}
                           onClick={async () => {
                             try {
                               await axios.put(`/api/orders/${order._id}/status`, { status });
@@ -393,6 +425,17 @@ export default function Dashboard() {
                           {status}
                         </button>
                       ))}
+                      {/* Escrow Status Indicator for Seller */}
+                      {order.status === 'shipped' && (
+                        <div className="px-4 py-2 bg-yellow-50 text-yellow-700 rounded-xl text-[10px] font-bold uppercase border border-yellow-100 flex items-center gap-2">
+                          <FiClock /> Waiting for Buyer Confirmation
+                        </div>
+                      )}
+                      {order.status === 'delivered' && (
+                        <div className="px-4 py-2 bg-green-50 text-green-700 rounded-xl text-[10px] font-bold uppercase border border-green-100 flex items-center gap-2">
+                          <FiCheckCircle /> Buyer Confirmed Receipt
+                        </div>
+                      )}
                     </div>
                   </div>
                 )) : (
@@ -512,11 +555,21 @@ export default function Dashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">City</label>
-                    <input type="text" defaultValue={user.address?.city} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-0 font-bold" />
+                    <input
+                      type="text"
+                      defaultValue={user.address?.city}
+                      disabled={!!user.address?.city}
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-0 font-bold disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
+                    />
                   </div>
                   <div>
                     <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Zip Code</label>
-                    <input type="text" defaultValue={user.address?.zipCode} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-0 font-bold" />
+                    <input
+                      type="text"
+                      defaultValue={user.address?.zipCode}
+                      disabled={!!user.address?.zipCode}
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-0 font-bold disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
+                    />
                   </div>
                 </div>
                 <button type="submit" className="px-8 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition-all">Save Changes</button>

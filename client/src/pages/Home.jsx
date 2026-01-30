@@ -26,10 +26,10 @@ const CATEGORIES = [
 ];
 
 const BRANDS = [
-  { name: 'Rolex', logo: 'https://cdn.simpleicons.org/rolex' },
+  { name: 'Rolex', logo: '/brands/rolex.png' },
   { name: 'Apple', logo: 'https://cdn.simpleicons.org/apple' },
   { name: 'Nike', logo: 'https://cdn.simpleicons.org/nike' },
-  { name: 'Sony', logo: 'https://cdn.simpleicons.org/sony' },
+  { name: 'Sony', logo: '/brands/sony.png' },
   { name: 'Adidas', logo: 'https://cdn.simpleicons.org/adidas' },
   { name: 'Samsung', logo: 'https://cdn.simpleicons.org/samsung' }
 ];

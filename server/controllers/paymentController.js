@@ -127,20 +127,28 @@ exports.confirmPayment = async (req, res, next) => {
     const Notification = require('../models/Notification');
     
     // 1. Notify Buyer
-    const buyerNotif = await Notification.create({
-      user: req.user.id,
-      type: 'payment_success',
-      message: `Payment successful for "${product.name}". Your order #${order._id.toString().slice(-6).toUpperCase()} is being processed.`,
-      product: productId
-    });
+    const existingBuyerNotif = await Notification.findOne({ user: req.user.id, type: 'payment_success', product: productId });
+    let buyerNotif;
+    if (!existingBuyerNotif) {
+      buyerNotif = await Notification.create({
+        user: req.user.id,
+        type: 'payment_success',
+        message: `Payment successful for "${product.name}". Your order #${order._id.toString().slice(-6).toUpperCase()} is being processed.`,
+        product: productId
+      });
+    }
 
     // 2. Notify Seller
-    const sellerNotif = await Notification.create({
-      user: product.seller,
-      type: 'item_sold',
-      message: `Good news! "${product.name}" has been paid for by ${req.user.name}. Check your sales tab for details.`,
-      product: productId
-    });
+    const existingSellerNotif = await Notification.findOne({ user: product.seller, type: 'item_sold', product: productId });
+    let sellerNotif;
+    if (!existingSellerNotif) {
+      sellerNotif = await Notification.create({
+        user: product.seller,
+        type: 'item_sold',
+        message: `Good news! "${product.name}" has been paid for by ${req.user.name}. Check your sales tab for details.`,
+        product: productId
+      });
+    }
 
     // 3. Emit via Sockets
     if (req.io) {

@@ -91,22 +91,30 @@ exports.checkEndedAuctions = async (io) => {
       product.status = 'ended';
       await product.save();
 
-      if (product.winner) {
+        if (product.winner) {
         // Notify Winner
-        const winnerNotif = await Notification.create({
-          user: product.winner._id,
-          type: 'auction_won',
-          message: `Congratulations! You won the auction for "${product.name}" with a bid of ₹${product.currentBid}`,
-          product: product._id
-        });
+        const existingWinnerNotif = await Notification.findOne({ user: product.winner._id, type: 'auction_won', product: product._id });
+        let winnerNotif;
+        if (!existingWinnerNotif) {
+          winnerNotif = await Notification.create({
+            user: product.winner._id,
+            type: 'auction_won',
+            message: `Congratulations! You won the auction for "${product.name}" with a bid of ₹${product.currentBid}`,
+            product: product._id
+          });
+        }
 
         // Notify Seller
-        const sellerNotif = await Notification.create({
-          user: product.seller,
-          type: 'auction_ended',
-          message: `Your auction for "${product.name}" has ended. Winner: ${product.winner.name}`,
-          product: product._id
-        });
+        const existingSellerNotif = await Notification.findOne({ user: product.seller, type: 'auction_ended', product: product._id });
+        let sellerNotif;
+        if (!existingSellerNotif) {
+          sellerNotif = await Notification.create({
+            user: product.seller,
+            type: 'auction_ended',
+            message: `Your auction for "${product.name}" has ended. Winner: ${product.winner.name}`,
+            product: product._id
+          });
+        }
 
         // Email Winner
         await sendEmail({
