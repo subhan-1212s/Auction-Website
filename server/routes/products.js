@@ -8,7 +8,6 @@ const {
   updateProduct, 
   deleteProduct,
   getMyProducts,
-  getMyProducts,
   getWonProducts,
   hideWonProduct
 } = require('../controllers/productController');
@@ -34,8 +33,6 @@ router
   .route('/:id')
   .get(getProduct)
   .put(auth, sellerAuth, updateProduct)
-  .delete(auth, sellerAuth, deleteProduct);
-
   .delete(auth, sellerAuth, deleteProduct);
 
 router.put('/:id/hide', auth, hideWonProduct);
