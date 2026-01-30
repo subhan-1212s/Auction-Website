@@ -184,32 +184,38 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-10">
-            {featured.length > 0 ? featured.map((item, i) => (
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, delay: i * 0.1 }}
-                key={item._id}
-              >
-                <Link to={`/auctions/${item._id}`} className="bg-white p-3 rounded-2xl border border-gray-50 hover-luxury-card group flex flex-col h-full">
-                  <div className="aspect-[4/5] mb-4 md:mb-6 relative overflow-hidden rounded-xl bg-gray-50">
-                    <img src={item.images?.[0] || '/products/iphone.jpg'} className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-1000" alt={item.name} />
-                    <div className="absolute top-3 left-3">
-                      <span className="bg-[#1A1A1A]/80 backdrop-blur-md text-white px-2.5 py-1 text-[7px] font-black uppercase rounded-full tracking-tighter">Premium</span>
-                    </div>
-                  </div>
-                  <h3 className="text-base md:text-lg font-luxury font-black text-gray-900 leading-[1.1] mb-3 group-hover:text-[#D4AF37] transition-colors line-clamp-2 h-10 md:h-12">{item.name}</h3>
-                  <div className="mt-auto flex items-center justify-between border-t border-gray-50 pt-4">
-                    <div className="font-black text-lg md:text-2xl text-[#1A1A1A]">₹{(item.currentBid || item.startingPrice).toLocaleString()}</div>
-                    <div className="text-[8px] md:text-[10px] text-gray-400 font-bold uppercase tracking-tighter">{item.bidCount || 0} Bids</div>
-                  </div>
-                </Link>
-              </motion.div>
-            )) : (
+            {loading ? (
               [1, 2, 3, 4, 5].map(i => (
                 <div key={i} className="aspect-[4/5] bg-gray-50 rounded-2xl animate-pulse"></div>
               ))
+            ) : featured.length > 0 ? (
+              featured.map((item, i) => (
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.8, delay: i * 0.1 }}
+                  key={item._id}
+                >
+                  <Link to={`/auctions/${item._id}`} className="bg-white p-3 rounded-2xl border border-gray-50 hover-luxury-card group flex flex-col h-full">
+                    <div className="aspect-[4/5] mb-4 md:mb-6 relative overflow-hidden rounded-xl bg-gray-50">
+                      <img src={item.images?.[0] || '/products/iphone.jpg'} className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-1000" alt={item.name} />
+                      <div className="absolute top-3 left-3">
+                        <span className="bg-[#1A1A1A]/80 backdrop-blur-md text-white px-2.5 py-1 text-[7px] font-black uppercase rounded-full tracking-tighter">Premium</span>
+                      </div>
+                    </div>
+                    <h3 className="text-base md:text-lg font-luxury font-black text-gray-900 leading-[1.1] mb-3 group-hover:text-[#D4AF37] transition-colors line-clamp-2 h-10 md:h-12">{item.name}</h3>
+                    <div className="mt-auto flex items-center justify-between border-t border-gray-50 pt-4">
+                      <div className="font-black text-lg md:text-2xl text-[#1A1A1A]">₹{(item.currentBid || item.startingPrice).toLocaleString()}</div>
+                      <div className="text-[8px] md:text-[10px] text-gray-400 font-bold uppercase tracking-tighter">{item.bidCount || 0} Bids</div>
+                    </div>
+                  </Link>
+                </motion.div>
+              ))
+            ) : (
+              <div className="col-span-full py-12 text-center">
+                <p className="text-gray-400 font-bold uppercase tracking-widest text-sm">No featured auctions at the moment</p>
+              </div>
             )}
           </div>
         </div>
@@ -254,7 +260,7 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-2 xs:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6">
-          {endingSoon.map((item, i) => (
+          {endingSoon.length > 0 ? endingSoon.map((item, i) => (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -278,7 +284,19 @@ export default function Home() {
                 </div>
               </Link>
             </motion.div>
-          ))}
+          )) : (
+            <>
+              {loading ? (
+                [1, 2, 3, 4, 5, 6].map(i => (
+                  <div key={i} className="aspect-[4/5] bg-gray-50 rounded-2xl animate-pulse"></div>
+                ))
+              ) : (
+                <div className="col-span-full py-8 text-center">
+                  <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">No auctions ending soon</p>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </section>
 
@@ -333,7 +351,11 @@ export default function Home() {
           </div>
         ) : (
           <div className="bg-white border border-gray-100 rounded-[2rem] p-16 text-center">
-            <h3 className="text-xl font-bold text-gray-400">Loading showroom...</h3>
+            {loading ? (
+              <h3 className="text-xl font-bold text-gray-400 animate-pulse">Loading showroom...</h3>
+            ) : (
+              <h3 className="text-xl font-bold text-gray-400">No vehicles available at the moment.</h3>
+            )}
           </div>
         )}
       </section>
@@ -388,7 +410,11 @@ export default function Home() {
           </div>
         ) : (
           <div className="bg-white border border-gray-100 rounded-[2rem] p-16 text-center">
-            <h3 className="text-xl font-bold text-gray-400">Loading collection...</h3>
+            {loading ? (
+              <h3 className="text-xl font-bold text-gray-400 animate-pulse">Loading collection...</h3>
+            ) : (
+              <h3 className="text-xl font-bold text-gray-400">No timepieces available at the moment.</h3>
+            )}
           </div>
         )}
       </section>
