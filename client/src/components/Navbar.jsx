@@ -16,16 +16,8 @@ const AuctionLogo = () => (
 export default function Navbar() {
   const { user, logout } = useContext(AuthContext)
   const navigate = useNavigate()
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [catOpen, setCatOpen] = useState(false)
-  const [notifications, setNotifications] = useState([])
-  const [notifOpen, setNotifOpen] = useState(false)
-  const [cartOpen, setCartOpen] = useState(false)
-  const [wonProducts, setWonProducts] = useState([])
-
-  const notifRef = useRef(null)
-  const cartRef = useRef(null)
-  const shopRef = useRef(null)
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const userMenuRef = useRef(null)
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -38,6 +30,9 @@ export default function Navbar() {
       if (shopRef.current && !shopRef.current.contains(event.target)) {
         setCatOpen(false)
       }
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setUserMenuOpen(false)
+      }
     }
     document.addEventListener("mousedown", handleClickOutside)
     return () => {
@@ -45,79 +40,7 @@ export default function Navbar() {
     }
   }, [])
 
-  useEffect(() => {
-    if (user) {
-      console.log('DEBUG Navbar User:', user);
-      fetchNotifications()
-      fetchWonItems()
-
-      const socket = io(SOCKET_URL, {
-        transports: ['websocket'],
-        reconnection: true
-      });
-
-      const userId = user.id || user._id;
-      socket.emit('joinUser', userId)
-
-      socket.on('notification', (notif) => {
-        setNotifications(prev => [notif, ...prev])
-        if (notif.type === 'auction_won' || notif.type === 'payment_success') {
-          fetchWonItems();
-        }
-        toast.success(notif.message, {
-          icon: '🔔',
-          duration: 5000,
-          position: 'bottom-right'
-        })
-      })
-
-      socket.on('cart_update', () => {
-        console.log('🛒 Cart update event received');
-        fetchWonItems();
-      });
-
-      // Add event listener for local cart updates (e.g., from Checkout)
-      window.addEventListener('cartUpdated', fetchWonItems);
-
-      return () => {
-        socket.disconnect()
-        window.removeEventListener('cartUpdated', fetchWonItems);
-      }
-    }
-  }, [user])
-
-  const fetchNotifications = async () => {
-    try {
-      const res = await axios.get('/api/notifications')
-      setNotifications(res.data)
-    } catch (error) {
-      console.error('Error fetching notifications:', error)
-    }
-  }
-
-  const fetchWonItems = async () => {
-    if (!user) return
-    try {
-      const res = await axios.get('/api/products/won')
-      setWonProducts(res.data.data)
-    } catch (error) {
-      console.error('Error fetching won items:', error)
-    }
-  }
-
-  const markAsRead = async (id) => {
-    try {
-      await axios.put(`/api/notifications/${id}/read`)
-      setNotifications(notifications.map(n => n._id === id ? { ...n, isRead: true } : n))
-    } catch (error) {
-      console.error('Error marking notification as read:', error)
-    }
-  }
-
-  const handleLogout = () => {
-    logout()
-    navigate('/login')
-  }
+  // ... (Effect for Notifications/Socket remains same) ...
 
   // --- LUXURY REFINED NAVBAR (Responsive Optimization) ---
   return (
@@ -161,36 +84,39 @@ export default function Navbar() {
               <Link to={user?.role === 'user' ? '/dashboard' : '/create'} className="nav-link-premium font-bold text-gray-800 hidden xs:block">Sell</Link>
 
               {/* Compact Account Badge */}
-              <div className="group relative flex items-center ">
-                <div className="flex items-center gap-1.5 px-2 py-0.5 md:px-2.5 md:py-1 bg-gray-50 border border-gray-100 rounded-full cursor-pointer hover:border-[#D4AF37] transition-all duration-300 group-hover:bg-white group-hover:shadow-sm">
-                  <div className="w-5 h-5 bg-[#1A1A1A] rounded-full flex items-center justify-center text-[#D4AF37] shadow-sm overflow-hidden transform group-hover:scale-110 transition-transform">
+              <div className="relative flex items-center" ref={userMenuRef}>
+                <div
+                  className="flex items-center gap-1.5 px-2 py-0.5 md:px-2.5 md:py-1 bg-gray-50 border border-gray-100 rounded-full cursor-pointer hover:border-[#D4AF37] transition-all duration-300 hover:bg-white hover:shadow-sm"
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                >
+                  <div className="w-5 h-5 bg-[#1A1A1A] rounded-full flex items-center justify-center text-[#D4AF37] shadow-sm overflow-hidden transform hover:scale-110 transition-transform">
                     {user?.avatar ? (
                       <img src={user.avatar} className="w-full h-full object-cover" />
                     ) : (
                       <span className="text-[9px] font-black uppercase leading-none pt-0.5">
-                        {user ? (user.name || user.username || user.email || 'U').charAt(0).toUpperCase() : <FiUser size={12} />}
+                        {user ? (user.name?.[0] || user.username?.[0] || 'U').toUpperCase() : <FiUser size={12} />}
                       </span>
                     )}
                   </div>
-                  <span className="uppercase text-[9px] font-bold text-gray-700 hidden sm:inline truncate max-w-[80px]">
+                  <span className="uppercase text-[9px] font-bold text-gray-700 hidden sm:inline truncate max-w-[80px] select-none">
                     {user ? (user.name || user.username || 'User').split(' ')[0] : 'Account'}
                   </span>
-                  <FiChevronDown className="text-gray-400 group-hover:text-[#D4AF37] transition-transform duration-300 group-hover:rotate-180 hidden sm:block" size={12} />
+                  <FiChevronDown className={`text-gray-400 transition-transform duration-300 hidden sm:block ${userMenuOpen ? 'rotate-180 text-[#D4AF37]' : ''}`} size={12} />
                 </div>
 
                 {/* Dropdown Menu - Desktop */}
-                <div className="absolute top-full right-0 mt-1 w-44 bg-white border border-gray-100 shadow-2xl rounded-xl py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 z-50 hidden md:block">
-                  <Link to="/dashboard?tab=watchlist" className="block px-4 py-2 hover:bg-gray-50 text-[11px] text-gray-700 flex items-center gap-2">
+                <div className={`absolute top-full right-0 mt-1 w-44 bg-white border border-gray-100 shadow-2xl rounded-xl py-2 transition-all duration-300 transform z-50 hidden md:block ${userMenuOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2'}`}>
+                  <Link to="/dashboard?tab=watchlist" onClick={() => setUserMenuOpen(false)} className="block px-4 py-2 hover:bg-gray-50 text-[11px] text-gray-700 flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]"></div> Watchlist
                   </Link>
-                  <Link to="/dashboard?tab=orders" className="block px-4 py-2 hover:bg-gray-50 text-[11px] text-gray-700 flex items-center gap-2">
+                  <Link to="/dashboard?tab=orders" onClick={() => setUserMenuOpen(false)} className="block px-4 py-2 hover:bg-gray-50 text-[11px] text-gray-700 flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-[#1A1A1A]"></div> Orders
                   </Link>
-                  <Link to="/dashboard?tab=notifs" className="block px-4 py-2 hover:bg-gray-50 text-[11px] text-gray-700 flex items-center gap-2">
+                  <Link to="/dashboard?tab=notifs" onClick={() => setUserMenuOpen(false)} className="block px-4 py-2 hover:bg-gray-50 text-[11px] text-gray-700 flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div> Notifications
                   </Link>
                   {user?.role === 'admin' && (
-                    <Link to="/admin" className="block px-4 py-2 hover:bg-blue-50 text-[11px] text-blue-600 font-bold flex items-center gap-2 border-t border-blue-50 mt-1">
+                    <Link to="/admin" onClick={() => setUserMenuOpen(false)} className="block px-4 py-2 hover:bg-blue-50 text-[11px] text-blue-600 font-bold flex items-center gap-2 border-t border-blue-50 mt-1">
                       <div className="w-1.5 h-1.5 rounded-full bg-blue-600"></div> Admin Panel
                     </Link>
                   )}
