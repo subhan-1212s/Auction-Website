@@ -8,7 +8,9 @@ const {
   updateProduct, 
   deleteProduct,
   getMyProducts,
-  getWonProducts
+  getMyProducts,
+  getWonProducts,
+  hideWonProduct
 } = require('../controllers/productController');
 
 const router = express.Router();
@@ -33,5 +35,9 @@ router
   .get(getProduct)
   .put(auth, sellerAuth, updateProduct)
   .delete(auth, sellerAuth, deleteProduct);
+
+  .delete(auth, sellerAuth, deleteProduct);
+
+router.put('/:id/hide', auth, hideWonProduct);
 
 module.exports = router;

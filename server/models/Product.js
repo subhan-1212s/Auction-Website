@@ -18,7 +18,8 @@ const productSchema = new mongoose.Schema({
   winner: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   isFeatured: { type: Boolean, default: false },
   views: { type: Number, default: 0 },
-  brand: { type: String, index: true }
+  brand: { type: String, index: true },
+  isHiddenByWinner: { type: Boolean, default: false }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Product', productSchema);

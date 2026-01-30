@@ -165,7 +165,8 @@ exports.getWonProducts = async (req, res, next) => {
   try {
     const products = await Product.find({ 
       winner: req.user.id,
-      status: { $in: ['ended', 'sold'] }
+      status: { $in: ['ended', 'sold'] },
+      isHiddenByWinner: { $ne: true }
     }).sort({ endTime: -1 });
     res.status(200).json({ success: true, count: products.length, data: products });
   } catch (err) {
@@ -217,6 +218,28 @@ exports.deleteProduct = async (req, res, next) => {
     }
 
     await product.remove();
+
+    res.status(200).json({ success: true, data: {} });
+  } catch (err) {
+    next(err);
+  }
+};
+// @desc    Hide won product from list
+// @route   PUT /api/products/:id/hide
+// @access  Private
+exports.hideWonProduct = async (req, res, next) => {
+  try {
+    const product = await Product.findOne({
+      _id: req.params.id,
+      winner: req.user.id
+    });
+
+    if (!product) {
+      return next(new ErrorResponse(`Product not found or you are not the winner`, 404));
+    }
+
+    product.isHiddenByWinner = true;
+    await product.save();
 
     res.status(200).json({ success: true, data: {} });
   } catch (err) {

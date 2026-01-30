@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { FiSearch, FiShoppingCart, FiBell, FiHeart, FiChevronDown, FiMenu, FiX, FiUser, FiUserPlus, FiCheck } from 'react-icons/fi'
+import { FiSearch, FiShoppingCart, FiBell, FiHeart, FiChevronDown, FiMenu, FiX, FiUser, FiUserPlus, FiCheck, FiTrash2 } from 'react-icons/fi'
 import { GiGavel } from 'react-icons/gi'
 import AuthContext from '../context/AuthContext'
 import { SOCKET_URL } from '../config'
@@ -118,6 +118,34 @@ export default function Navbar() {
       setNotifications(notifications.map(n => n._id === id ? { ...n, isRead: true } : n))
     } catch (error) {
       console.error('Error marking notification as read:', error)
+    }
+  }
+
+  const deleteNotification = async (e, id) => {
+    e.stopPropagation();
+    try {
+      await axios.delete(`/api/notifications/${id}`);
+      setNotifications(prev => prev.filter(n => n._id !== id));
+      toast.success('Notification removed');
+    } catch (error) {
+      console.error('Error deleting notification:', error);
+      toast.error('Failed to remove notification');
+    }
+  }
+
+  const removeWonItem = async (e, id) => {
+    e.stopPropagation(); // Prevent navigation
+    try {
+      // Optimistically remove from UI
+      setWonProducts(prev => prev.filter(item => item._id !== id));
+
+      await axios.put(`/api/products/${id}/hide`);
+      toast.success('Item removed from cart');
+    } catch (error) {
+      console.error('Error hiding won item:', error);
+      toast.error('Could not remove item');
+      // Re-fetch to restore if failed
+      fetchWonItems();
     }
   }
 
@@ -309,8 +337,15 @@ export default function Navbar() {
                     </div>
                     <div className="max-h-80 overflow-y-auto px-2 space-y-1">
                       {notifications.length > 0 ? notifications.slice(0, 5).map(n => (
-                        <div key={n._id} onClick={() => markAsRead(n._id)} className={`p-3 rounded-xl transition-all cursor-pointer ${n.isRead ? 'opacity-50' : 'bg-blue-50/50 hover:bg-blue-50 border border-blue-100/30'}`}>
-                          <p className="text-[11px] font-bold text-gray-900 leading-snug">{n.message}</p>
+                        <div key={n._id} onClick={() => markAsRead(n._id)} className={`relative p-3 rounded-xl transition-all cursor-pointer group/item ${n.isRead ? 'opacity-50' : 'bg-blue-50/50 hover:bg-blue-50 border border-blue-100/30'}`}>
+                          <button
+                            onClick={(e) => deleteNotification(e, n._id)}
+                            className="absolute top-2 right-2 p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover/item:opacity-100 transition-opacity"
+                            title="Delete Notification"
+                          >
+                            <FiTrash2 size={10} />
+                          </button>
+                          <p className="text-[11px] font-bold text-gray-900 leading-snug pr-4">{n.message}</p>
                           <div className="flex justify-between items-center mt-2">
                             <p className="text-[9px] text-gray-400 font-medium">{new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                             {n.type === 'auction_won' && !n.isRead && (
@@ -355,8 +390,15 @@ export default function Navbar() {
                     </div>
                     <div className="max-h-64 overflow-y-auto px-4 space-y-3">
                       {wonProducts.length > 0 ? wonProducts.map(item => (
-                        <div key={item._id} className="p-3 bg-gray-50 rounded-xl border border-gray-100">
-                          <p className="text-[11px] font-bold text-gray-900 leading-tight mb-1">{item.name}</p>
+                        <div key={item._id} className="relative p-3 bg-gray-50 rounded-xl border border-gray-100 group/item">
+                          <button
+                            onClick={(e) => removeWonItem(e, item._id)}
+                            className="absolute top-2 right-2 p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover/item:opacity-100 transition-opacity z-10"
+                            title="Remove from List"
+                          >
+                            <FiTrash2 size={12} />
+                          </button>
+                          <p className="text-[11px] font-bold text-gray-900 leading-tight mb-1 pr-4">{item.name}</p>
                           <p className="text-[10px] text-blue-600 font-black mb-2">Final Bid: ₹{item.currentBid.toLocaleString()}</p>
                           {item.status === 'sold' ? (
                             <Link
