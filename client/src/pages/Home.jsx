@@ -29,7 +29,7 @@ const BRANDS = [
   { name: 'Rolex', logo: '/brands/rolex.png' },
   { name: 'Apple', logo: 'https://cdn.simpleicons.org/apple' },
   { name: 'Nike', logo: 'https://cdn.simpleicons.org/nike' },
-  { name: 'Sony', logo: 'https://cdn.simpleicons.org/sony' },
+  { name: 'Sony', logo: 'https://cdn.simpleicons.org/sony/000000' },
   { name: 'Adidas', logo: 'https://cdn.simpleicons.org/adidas' },
   { name: 'Samsung', logo: 'https://cdn.simpleicons.org/samsung' }
 ];
