@@ -213,7 +213,7 @@ export default function CreateAuction() {
                 <div>
                   <label className="text-[10px] uppercase font-black text-gray-400 tracking-widest mb-2 block">Category</label>
                   <select name="category" className="w-full px-5 py-4 rounded-2xl border border-gray-100 bg-gray-50 font-bold outline-none cursor-pointer" value={formData.category} onChange={handleChange}>
-                    {['Electronics', 'Fashion', 'Art', 'Collectibles', 'Motors', 'Home & Garden'].map(c => <option key={c}>{c}</option>)}
+                    {['Watches', 'Electronics', 'Fashion', 'Motors', 'Collectibles', 'Art', 'Sports', 'Jewelry', 'Home & Garden'].map(c => <option key={c}>{c}</option>)}
                   </select>
                 </div>
                 <div>
