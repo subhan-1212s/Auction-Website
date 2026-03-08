@@ -110,6 +110,11 @@ export default function ProductDetails() {
             if (diff <= 0) {
                 setTimeLeft('ENDED');
                 clearInterval(interval);
+                
+                // Immediately force the backend to resolve the auction without waiting for cron
+                if (product.status === 'active') {
+                    axios.post(`/api/bids/product/${product._id}/resolve`).catch(err => console.error(err));
+                }
             } else {
                 const h = Math.floor(diff / 3600000);
                 const m = Math.floor((diff % 3600000) / 60000);

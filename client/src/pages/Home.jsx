@@ -421,7 +421,18 @@ export default function Home() {
 
       {user && recentlyViewed.length > 0 && (
         <section className="py-20 px-6 max-w-[1440px] mx-auto border-t border-gray-50">
-          <h2 className="text-3xl md:text-4xl font-luxury font-black text-gray-900 mb-12 tracking-tighter text-center md:text-left">Recently Viewed</h2>
+          <div className="flex justify-between items-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-luxury font-black text-gray-900 tracking-tighter">Recently Viewed</h2>
+            <button 
+              onClick={() => {
+                localStorage.removeItem('recentlyViewed');
+                setRecentlyViewed([]);
+              }}
+              className="text-xs uppercase font-bold text-gray-400 hover:text-red-500 transition-colors"
+            >
+              Clear History
+            </button>
+          </div>
           <div className="grid grid-cols-2 md:grid-cols-6 gap-6 md:gap-8">
             {recentlyViewed.map((item) => (
               <Link to={`/auctions/${item._id}`} key={item._id} className="group cursor-pointer flex flex-col">

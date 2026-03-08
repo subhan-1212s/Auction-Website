@@ -196,47 +196,49 @@ export default function Navbar() {
               <Link to={user?.role === 'user' ? '/dashboard' : '/create'} className="nav-link-premium font-bold text-gray-800 hidden xs:block">Sell</Link>
 
               {/* Compact Account Badge */}
-              <div className="relative flex items-center" ref={userMenuRef}>
-                <div
-                  className="flex items-center gap-1.5 px-2 py-0.5 md:px-2.5 md:py-1 bg-gray-50 border border-gray-100 rounded-full cursor-pointer hover:border-[#D4AF37] transition-all duration-300 hover:bg-white hover:shadow-sm"
-                  onClick={() => setUserMenuOpen(!userMenuOpen)}
-                >
-                  <div className="w-5 h-5 bg-[#1A1A1A] rounded-full flex items-center justify-center text-[#D4AF37] shadow-sm overflow-hidden transform hover:scale-110 transition-transform">
-                    {user?.avatar ? (
-                      <img src={user.avatar} className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-[9px] font-black uppercase leading-none pt-0.5">
-                        {user ? (user.name?.[0] || user.username?.[0] || 'U').toUpperCase() : <FiUser size={12} />}
-                      </span>
-                    )}
+              {user && (
+                <div className="relative flex items-center" ref={userMenuRef}>
+                  <div
+                    className="flex items-center gap-1.5 px-2 py-0.5 md:px-2.5 md:py-1 bg-gray-50 border border-gray-100 rounded-full cursor-pointer hover:border-[#D4AF37] transition-all duration-300 hover:bg-white hover:shadow-sm"
+                    onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  >
+                    <div className="w-5 h-5 bg-[#1A1A1A] rounded-full flex items-center justify-center text-[#D4AF37] shadow-sm overflow-hidden transform hover:scale-110 transition-transform">
+                      {user.avatar ? (
+                        <img src={user.avatar} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-[9px] font-black uppercase leading-none pt-0.5">
+                          {(user.name?.[0] || user.username?.[0] || 'U').toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+                    <span className="uppercase text-[9px] font-bold text-gray-700 hidden sm:inline truncate max-w-[80px] select-none">
+                      {(user.name || user.username || 'User').split(' ')[0]}
+                    </span>
+                    <FiChevronDown className={`text-gray-400 transition-transform duration-300 hidden sm:block ${userMenuOpen ? 'rotate-180 text-[#D4AF37]' : ''}`} size={12} />
                   </div>
-                  <span className="uppercase text-[9px] font-bold text-gray-700 hidden sm:inline truncate max-w-[80px] select-none">
-                    {user ? (user.name || user.username || 'User').split(' ')[0] : 'Account'}
-                  </span>
-                  <FiChevronDown className={`text-gray-400 transition-transform duration-300 hidden sm:block ${userMenuOpen ? 'rotate-180 text-[#D4AF37]' : ''}`} size={12} />
-                </div>
 
-                {/* Dropdown Menu - Desktop */}
-                <div className={`absolute top-full right-0 mt-1 w-44 bg-white border border-gray-100 shadow-2xl rounded-xl py-2 transition-all duration-300 transform z-50 hidden md:block ${userMenuOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2'}`}>
-                  <Link to="/dashboard?tab=watchlist" onClick={() => setUserMenuOpen(false)} className="block px-4 py-2 hover:bg-gray-50 text-[11px] text-gray-700 flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]"></div> Watchlist
-                  </Link>
-                  <Link to="/dashboard?tab=orders" onClick={() => setUserMenuOpen(false)} className="block px-4 py-2 hover:bg-gray-50 text-[11px] text-gray-700 flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#1A1A1A]"></div> Orders
-                  </Link>
-                  <Link to="/dashboard?tab=notifs" onClick={() => setUserMenuOpen(false)} className="block px-4 py-2 hover:bg-gray-50 text-[11px] text-gray-700 flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div> Notifications
-                  </Link>
-                  {user?.role === 'admin' && (
-                    <Link to="/admin" onClick={() => setUserMenuOpen(false)} className="block px-4 py-2 hover:bg-blue-50 text-[11px] text-blue-600 font-bold flex items-center gap-2 border-t border-blue-50 mt-1">
-                      <div className="w-1.5 h-1.5 rounded-full bg-blue-600"></div> Admin Panel
+                  {/* Dropdown Menu - Desktop */}
+                  <div className={`absolute top-full right-0 mt-1 w-44 bg-white border border-gray-100 shadow-2xl rounded-xl py-2 transition-all duration-300 transform z-50 hidden md:block ${userMenuOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2'}`}>
+                    <Link to="/dashboard?tab=watchlist" onClick={() => setUserMenuOpen(false)} className="block px-4 py-2 hover:bg-gray-50 text-[11px] text-gray-700 flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]"></div> Watchlist
                     </Link>
-                  )}
-                  <button onClick={handleLogout} className="w-full text-left px-4 py-2 hover:bg-gray-50 text-[11px] text-red-500 font-bold flex items-center gap-2">
-                    Logout
-                  </button>
+                    <Link to="/dashboard?tab=orders" onClick={() => setUserMenuOpen(false)} className="block px-4 py-2 hover:bg-gray-50 text-[11px] text-gray-700 flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#1A1A1A]"></div> Orders
+                    </Link>
+                    <Link to="/dashboard?tab=notifs" onClick={() => setUserMenuOpen(false)} className="block px-4 py-2 hover:bg-gray-50 text-[11px] text-gray-700 flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div> Notifications
+                    </Link>
+                    {user?.role === 'admin' && (
+                      <Link to="/admin" onClick={() => setUserMenuOpen(false)} className="block px-4 py-2 hover:bg-blue-50 text-[11px] text-blue-600 font-bold flex items-center gap-2 border-t border-blue-50 mt-1">
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-600"></div> Admin Panel
+                      </Link>
+                    )}
+                    <button onClick={handleLogout} className="w-full text-left px-4 py-2 hover:bg-gray-50 text-[11px] text-red-500 font-bold flex items-center gap-2">
+                      Logout
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Mobile Menu Toggle */}
               <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden text-gray-600 hover:text-[#D4AF37] transition-colors p-1 flex items-center gap-1 group">

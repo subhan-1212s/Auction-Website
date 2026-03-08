@@ -20,6 +20,19 @@ router.get('/product/:productId', async (req, res, next) => {
   }
 });
 
+// Force resolve the auction (called by frontend when timer hits zero)
+router.post('/product/:productId/resolve', async (req, res, next) => {
+  try {
+    // Calling the check logic manually will instantly close the auction and send emails without waiting for CRON
+    if (req.io) {
+      await checkEndedAuctions(req.io);
+    }
+    res.json({ success: true, message: 'Auction resolution checked' });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // Get user's bids
 router.get('/my-bids', auth, async (req, res, next) => {
   try {
