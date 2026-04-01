@@ -115,7 +115,7 @@ router.post('/verify-otp', async (req, res, next) => {
         role: user.role, 
         isApproved: user.isApproved,
         avatar: user.avatar,
-        address: user.address,
+        addresses: user.addresses,
         needsProfileUpdate
       } 
     });

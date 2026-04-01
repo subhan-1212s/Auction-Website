@@ -124,9 +124,9 @@ exports.createProduct = async (req, res, next) => {
 
     // Handle images if uploaded via multer
     if (req.files) {
+      const baseUrl = `${req.protocol}://${req.get('host')}`;
       req.body.images = req.files.map(file => {
-        // Just store the filename or relative path from uploads
-        return `/uploads/${file.filename}`;
+        return `${baseUrl}/uploads/${file.filename}`;
       });
     }
 
