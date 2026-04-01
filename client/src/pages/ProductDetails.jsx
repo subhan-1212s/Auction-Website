@@ -148,7 +148,8 @@ export default function ProductDetails() {
             toast.success('Bid placed successfully!');
             fetchBids();
         } catch (err) {
-            toast.error(err.response?.data?.message || 'Error placing bid');
+            console.error('Bid failed:', err.response?.data || err);
+            toast.error(err.response?.data?.error || err.response?.data?.message || 'Error placing bid');
         }
     };
 
