@@ -129,6 +129,12 @@ export default function ProductDetails() {
         e.preventDefault();
         if (!user) return toast.error('Please login to place bids');
 
+        // Force profile setup before bidding
+        if (!user.phone || !user.addresses || user.addresses.length === 0) {
+            toast.error('Please complete your profile first to place bids', { duration: 4000 });
+            return navigate('/complete-profile');
+        }
+
         const amount = parseFloat(bidAmount);
         const minBid = (product.currentBid || product.startingPrice) + (product.minimumIncrement || 1);
 
@@ -184,10 +190,8 @@ export default function ProductDetails() {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                     {/* Main Content */}
                     <div className="lg:col-span-8 space-y-4 md:space-y-6">
-                        <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
-                            <div className="aspect-square md:aspect-[16/10] bg-gray-50 relative group">
-                                <img src={product?.images?.[0] || 'https://via.placeholder.com/800x500'} alt={product.name} className="w-full h-full object-contain p-4 md:p-8" />
-                            </div>
+                        <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex items-center justify-center bg-gray-50/50 p-4 min-h-[400px]">
+                            <img src={product?.images?.[0] || 'https://via.placeholder.com/800x500'} alt={product.name} className="max-w-full max-h-[500px] object-contain drop-shadow-xl hover:scale-105 transition-transform duration-500" />
                         </div>
 
                         <div className="bg-white p-5 md:p-8 rounded-2xl shadow-sm border border-gray-100">

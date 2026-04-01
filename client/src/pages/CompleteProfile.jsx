@@ -45,13 +45,14 @@ export default function CompleteProfile() {
         try {
             await updateProfile({
                 phone: formData.phone,
-                address: {
+                addresses: [{
                     street: formData.street,
                     city: formData.city,
                     state: formData.state,
                     zipCode: formData.zipCode,
-                    country: formData.country
-                }
+                    country: formData.country,
+                    isDefault: true
+                }]
             });
             toast.success('Profile completed! You can now start bidding.');
             navigate('/dashboard');

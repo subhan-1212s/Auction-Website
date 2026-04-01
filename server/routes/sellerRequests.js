@@ -60,11 +60,29 @@ router.put('/:id', auth, async (req, res, next) => {
 
     if (status === 'approved') {
       const targetUser = await User.findById(request.user);
-      if (targetUser && targetUser.role === 'user') {
+      if (targetUser) {
         targetUser.role = 'seller';
+        targetUser.isApproved = true;
+        await targetUser.save();
+
+        const Notification = require('../models/Notification');
+        const notif = await Notification.create({
+          user: targetUser._id,
+          type: 'seller_approved',
+          message: 'Congratulations! Your seller application was approved. You can now list items for auction.'
+        });
+
+        if (req.io) {
+          req.io.to(`user_${targetUser._id}`).emit('notification', notif);
+        }
+
+        const sendEmail = require('../utils/sendEmail');
+        await sendEmail({
+          email: targetUser.email,
+          subject: 'Smart Auction - Seller Account Approved!',
+          message: `Congratulations ${targetUser.name}, your request to become a verified seller has been unconditionally approved by the administration team.\n\nYou can now log in and navigate to the dashboard to begin creating your very first luxury auction!`
+        }).catch(err => console.error('Error sending seller approval email:', err));
       }
-      targetUser.isApproved = true;
-      await targetUser.save();
     }
 
     res.json({ success: true, message: `Request ${status}` });

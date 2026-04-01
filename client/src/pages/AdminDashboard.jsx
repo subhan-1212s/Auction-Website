@@ -63,6 +63,18 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleRevokeSeller = async (userId) => {
+    if (window.confirm('Revoke seller privileges for this user?')) {
+      try {
+        await axios.put(`/api/admin/users/${userId}/role`, { role: 'user' });
+        toast.success('Seller privileges revoked');
+        fetchAdminData();
+      } catch (error) {
+        toast.error('Failed to revoke privileges');
+      }
+    }
+  };
+
   const handleDeleteProduct = async (productId) => {
     if (window.confirm('Delete this auction permanently?')) {
       try {
@@ -105,8 +117,7 @@ export default function AdminDashboard() {
               <h1 className="text-4xl font-black tracking-tight">System Administration</h1>
               <p className="text-gray-400 mt-2 font-medium italic">Monitoring platform integrity and commercial flows.</p>
             </div>
-
-            <div className="flex bg-white/5 backdrop-blur-md rounded-2xl p-2 border border-white/10">
+            <div className="flex bg-white/5 backdrop-blur-md rounded-2xl p-2 border border-white/10 overflow-x-auto custom-scrollbar whitespace-nowrap">
               {[
                 { id: 'stats', label: 'Overview', icon: FiGrid },
                 { id: 'users', label: 'Users', icon: FiUsers },
@@ -234,7 +245,12 @@ export default function AdminDashboard() {
                         </td>
                         <td className="px-8 py-5 text-right">
                           <div className="flex justify-end gap-2">
-                            <button onClick={() => handleUserBlock(u._id)} className={`p-2 rounded-lg transition-colors ${u.isBlocked ? 'bg-green-100 text-green-600 hover:bg-green-200' : 'bg-red-100 text-red-600 hover:bg-red-200'}`}>
+                            {u.role === 'seller' && (
+                              <button onClick={() => handleRevokeSeller(u._id)} title="Revoke Seller Access" className="p-2 rounded-lg bg-orange-100 text-orange-600 hover:bg-orange-200 transition-colors">
+                                <FiUserX size={16} />
+                              </button>
+                            )}
+                            <button onClick={() => handleUserBlock(u._id)} title={u.isBlocked ? "Unblock User" : "Block User"} className={`p-2 rounded-lg transition-colors ${u.isBlocked ? 'bg-green-100 text-green-600 hover:bg-green-200' : 'bg-red-100 text-red-600 hover:bg-red-200'}`}>
                               {u.isBlocked ? <FiUserCheck size={16} /> : <FiUserX size={16} />}
                             </button>
                           </div>

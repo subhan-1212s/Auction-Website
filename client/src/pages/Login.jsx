@@ -145,14 +145,8 @@ export default function Login() {
             )}
 
             {step === 1 && (
-              <div className="flex items-center justify-between">
-                <label className="flex items-center gap-2 cursor-pointer group">
-                  <div className="w-5 h-5 rounded-md border border-gray-200 flex items-center justify-center group-hover:border-blue-500 transition-colors">
-                    <div className="w-2 h-2 bg-blue-600 rounded-full scale-0 group-hover:scale-100 transition-transform"></div>
-                  </div>
-                  <span className="text-sm font-bold text-gray-600">Secure session</span>
-                </label>
-                <Link to="/forgot" className="text-sm font-black text-blue-600 hover:text-blue-700">Recovery Access?</Link>
+              <div className="flex items-center justify-end">
+                <Link to="/forgot-password" className="text-sm font-black text-blue-600 hover:text-blue-700">Recovery Access?</Link>
               </div>
             )}
 

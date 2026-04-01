@@ -16,6 +16,7 @@ import Home from './pages/Home'
 import Auctions from './pages/Auctions'
 import CreateAuction from './pages/CreateAuction'
 import Login from './pages/Login'
+import ForgotPassword from './pages/ForgotPassword'
 import Register from './pages/Register'
 import Checkout from './pages/Checkout'
 import InvoicePage from './pages/Invoice'
@@ -42,10 +43,8 @@ const ProtectedRoute = ({ children, roles = [] }) => {
     return <Navigate to="/" />
   }
 
-  const isCompleteProfilePath = window.location.pathname === '/complete-profile'
-  if (user.needsProfileUpdate && !isCompleteProfilePath) {
-    return <Navigate to="/complete-profile" />
-  }
+  // Removed forced complete profile redirection from protected routes globally.
+  // Profile completion will solely be enforced during bidding or specific actions.
 
   return children
 }
@@ -61,6 +60,7 @@ function App() {
           <Route path='/auctions' element={<Auctions />} />
           <Route path='/auctions/:id' element={<ProductDetails />} />
           <Route path='/login' element={<Login />} />
+          <Route path='/forgot-password' element={<ForgotPassword />} />
           <Route path='/register' element={<Register />} />
           <Route path='/complete-profile' element={
             <ProtectedRoute>

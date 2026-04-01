@@ -221,5 +221,52 @@ router.post('/watchlist/:productId', auth, async (req, res, next) => {
     next(err);
   }
 });
+// Forgot Password - Send OTP
+router.post('/forgot-password', async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) return res.json({ success: true, message: 'If an account exists, an OTP has been sent.' });
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpires = Date.now() + 10 * 60 * 1000;
+
+    user.otp = otp;
+    user.otpExpires = otpExpires;
+    await user.save();
+
+    const sendEmail = require('../utils/sendEmail');
+    await sendEmail({
+      email: user.email,
+      subject: 'Password Reset OTP',
+      message: `Your OTP to reset your password is ${otp}. It expires in 10 minutes.`
+    });
+
+    res.json({ success: true, message: 'OTP sent to your email' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Reset Password - Verify OTP & Update Password
+router.post('/reset-password', async (req, res, next) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+    const user = await User.findOne({ email, otp, otpExpires: { $gt: Date.now() } });
+
+    if (!user) {
+      return next(new ErrorResponse('Invalid or expired OTP', 400));
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    user.otp = undefined;
+    user.otpExpires = undefined;
+    await user.save();
+
+    res.json({ success: true, message: 'Password reset successfully' });
+  } catch (err) {
+    next(err);
+  }
+});
 
 module.exports = router;

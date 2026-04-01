@@ -37,7 +37,10 @@ router.put('/users/:id/block', auth, adminAuth, async (req, res, next) => {
 router.put('/users/:id/role', auth, adminAuth, async (req, res, next) => {
   try {
     const { role } = req.body;
-    const user = await User.findByIdAndUpdate(req.params.id, { role }, { new: true }).select('-password');
+    let updateData = { role };
+    if (role === 'user') { updateData.isApproved = false; }
+    
+    const user = await User.findByIdAndUpdate(req.params.id, updateData, { new: true }).select('-password');
     if (!user) return next(new ErrorResponse('User not found', 404));
     res.json({ success: true, data: user });
   } catch (err) {
