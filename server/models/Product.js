@@ -22,4 +22,7 @@ const productSchema = new mongoose.Schema({
   isHiddenByWinner: { type: Boolean, default: false }
 }, { timestamps: true });
 
+// Add text index for search
+productSchema.index({ name: 'text', description: 'text', category: 'text' });
+
 module.exports = mongoose.model('Product', productSchema);

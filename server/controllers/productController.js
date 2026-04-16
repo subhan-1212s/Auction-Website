@@ -28,11 +28,18 @@ exports.getProducts = async (req, res, next) => {
     
     // Add search functionality
     if (req.query.search) {
+      const searchRegex = new RegExp(req.query.search, 'i');
       queryObj.$or = [
-        { name: { $regex: req.query.search, $options: 'i' } },
-        { description: { $regex: req.query.search, $options: 'i' } },
-        { category: { $regex: req.query.search, $options: 'i' } }
+        { name: { $regex: searchRegex } },
+        { description: { $regex: searchRegex } },
+        { category: { $regex: searchRegex } },
+        { brand: { $regex: searchRegex } }
       ];
+    }
+
+    // Make category filtering case-insensitive (if category is present and not part of $or)
+    if (queryObj.category && !queryObj.$or) {
+      queryObj.category = { $regex: new RegExp(`^${queryObj.category}$`, 'i') };
     }
 
     // Filter by active status by default unless specified

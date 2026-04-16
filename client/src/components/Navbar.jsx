@@ -25,6 +25,7 @@ export default function Navbar() {
 
   // New state for user menu
   const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
   const userMenuRef = useRef(null)
 
   const notifRef = useRef(null)
@@ -153,6 +154,15 @@ export default function Navbar() {
     logout()
     navigate('/login')
   }
+  
+  const handleSearch = (e) => {
+    if (e) e.preventDefault()
+    if (searchTerm.trim()) {
+      navigate(`/auctions?q=${encodeURIComponent(searchTerm.trim())}`)
+      setSearchTerm('')
+      setMobileMenuOpen(false)
+    }
+  }
 
   // --- LUXURY REFINED NAVBAR (Responsive Optimization) ---
   return (
@@ -273,7 +283,7 @@ export default function Navbar() {
                   className="absolute top-full left-0 mt-2 w-[550px] bg-white border border-gray-100 shadow-2xl rounded-2xl p-8 z-[3000] origin-top-left"
                 >
                   <div className="grid grid-cols-3 gap-10">
-                    {['Electronics', 'Fashion', 'Art'].map((m) => (
+                    {['Electronics', 'Fashion', 'Watches'].map((m) => (
                       <div key={m}>
                         <h4 className="font-luxury font-black text-gray-900 mb-4 text-[10px] uppercase border-b border-gray-100 pb-2 tracking-widest">{m}</h4>
                         <ul className="space-y-2 text-[11px] text-gray-500 font-medium">
@@ -296,19 +306,21 @@ export default function Navbar() {
         {/* SEARCH BAR - Dynamic Center Column */}
         <div className="flex justify-center w-full md:max-w-none">
           <div className="w-full max-w-2xl transition-all duration-500 ease-in-out group">
-            <div className="relative flex h-9 md:h-8 border border-gray-200 rounded-md overflow-hidden bg-gray-50/50 transition-all duration-500 focus-within:bg-white focus-within:border-[#1A1A1A] focus-within:shadow-[0_0_15px_rgba(0,0,0,0.05)]">
+            <form onSubmit={handleSearch} className="relative flex h-9 md:h-8 border border-gray-200 rounded-md overflow-hidden bg-gray-50/50 transition-all duration-500 focus-within:bg-white focus-within:border-[#1A1A1A] focus-within:shadow-[0_0_15px_rgba(0,0,0,0.05)]">
               <div className="flex items-center px-3 pointer-events-none">
                 <FiSearch size={14} className="text-gray-400 group-focus-within:text-[#D4AF37] group-focus-within:scale-125 transition-all duration-500" />
               </div>
               <input
                 type="text"
                 placeholder="Search premium auctions..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className="flex-1 px-1 py-0 text-[12px] border-none outline-none text-gray-800 placeholder-gray-400 font-medium bg-transparent"
               />
-              <button className="relative px-4 md:px-6 bg-[#1A1A1A] text-white font-bold text-[9px] md:text-[10px] uppercase tracking-widest hover:bg-[#333] transition-all duration-500 hover-luxury-button">
+              <button type="submit" className="relative px-4 md:px-6 bg-[#1A1A1A] text-white font-bold text-[9px] md:text-[10px] uppercase tracking-widest hover:bg-[#333] transition-all duration-500 hover-luxury-button">
                 Search
               </button>
-            </div>
+            </form>
           </div>
         </div>
 
@@ -489,7 +501,7 @@ export default function Navbar() {
             <div className="mt-4 pt-4 border-t border-gray-100">
               <p className="text-[10px] uppercase text-gray-400 tracking-widest font-black mb-4">Categories</p>
               <div className="grid grid-cols-1 gap-2">
-                {['Motors', 'Fashion', 'Electronics', 'Sports', 'Art', 'Collectibles'].map(c => (
+                {['Motors', 'Fashion', 'Electronics', 'Sports', 'Watches', 'Collectibles'].map(c => (
                   <Link key={c} to={`/auctions?cat=${c}`} onClick={() => setMobileMenuOpen(false)} className="text-gray-700 hover:text-[#D4AF37] flex justify-between items-center bg-gray-50/50 p-2 rounded-lg">
                     <span>{c}</span>
                     <FiChevronDown className="-rotate-90 text-gray-300" size={14} />

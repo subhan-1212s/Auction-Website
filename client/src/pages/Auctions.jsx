@@ -4,7 +4,7 @@ import { FiSearch, FiFilter, FiClock, FiTag, FiLayout, FiGrid, FiList, FiChevron
 import { Link, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 
-const CATEGORIES = ['All', 'Electronics', 'Fashion', 'Motors', 'Collectibles', 'Art', 'Sports'];
+const CATEGORIES = ['All', 'Electronics', 'Fashion', 'Motors', 'Watches', 'Collectibles', 'Art', 'Sports'];
 
 export default function Auctions() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -21,17 +21,20 @@ export default function Auctions() {
     const fetchAuctions = async () => {
       setLoading(true);
       try {
-        let url = `/api/products?sort=${currentSort}`;
+        const params = new URLSearchParams();
+        params.append('sort', currentSort);
 
         if (currentCategory === 'Deals') {
           // For Deals, show cheapest items first effectively acting as "All" sorted
-          if (currentSort === '-createdAt') url = `/api/products?sort=currentBid`;
+          if (currentSort === '-createdAt') params.set('sort', 'currentBid');
         } else if (currentCategory !== 'All') {
-          url += `&category=${currentCategory}`;
+          params.append('category', currentCategory);
         }
 
-        if (currentSearch) url += `&search=${currentSearch}`;
-        if (currentSeller) url += `&seller=${currentSeller}`;
+        if (currentSearch) params.append('search', currentSearch);
+        if (currentSeller) params.append('seller', currentSeller);
+
+        const url = `/api/products?${params.toString()}`;
 
         const res = await axios.get(url);
         setAuctions(res.data.data);

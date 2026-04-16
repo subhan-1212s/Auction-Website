@@ -283,7 +283,7 @@ const indianProducts = [
   {
     name: 'Vintage HMT Pilot Mechanical Watch',
     description: 'Classic HMT Pilot hand-winding mechanical watch. 17 Jewels. Black dial with luminous hands. Stainless steel case. A true Indian icon. Fully serviced and working perfectly.',
-    category: 'Collectibles',
+    category: 'Watches',
     condition: 'used',
     startingPrice: 4500,
     currentBid: 5800,
