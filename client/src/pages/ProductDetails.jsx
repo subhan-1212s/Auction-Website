@@ -7,7 +7,7 @@ import axios from 'axios';
 import io from 'socket.io-client';
 import { formatDistanceToNow } from 'date-fns';
 import AuthContext from '../context/AuthContext';
-import { SOCKET_URL } from '../config';
+import { SOCKET_URL, getImageUrl } from '../config';
 
 export default function ProductDetails() {
     const { id } = useParams();
@@ -85,7 +85,7 @@ export default function ProductDetails() {
                     _id: product._id,
                     name: product.name,
                     price: product.currentBid || product.startingPrice,
-                    image: product.images?.[0] || 'https://via.placeholder.com/800x500',
+                    image: getImageUrl(product.images?.[0]),
                     viewedAt: new Date().toISOString()
                 };
 

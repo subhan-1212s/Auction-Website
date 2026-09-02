@@ -4,6 +4,7 @@ import axios from 'axios';
 import { FiArrowRight, FiCheckCircle, FiHeart, FiStar, FiRefreshCcw, FiTruck } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import AuthContext from '../context/AuthContext';
+import { getImageUrl } from '../config';
 
 const DEALS = [
   { id: 1, title: 'Apple iPhone 15 Pro, 256GB - Titanium', price: '₹1,19,900', img: '/products/iphone_15pro.png' },
@@ -436,7 +437,7 @@ export default function Home() {
             {recentlyViewed.map((item) => (
               <Link to={`/auctions/${item._id}`} key={item._id} className="group cursor-pointer flex flex-col">
                 <div className="aspect-square bg-gray-50 border border-gray-100 rounded-2xl mb-4 overflow-hidden items-center flex justify-center p-6 group-hover:shadow-lg transition-all">
-                  <img src={item.image} className="max-h-full max-w-full object-contain group-hover:scale-110 transition-transform duration-500" alt={item.name} />
+                  <img src={getImageUrl(item.image)} onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&q=80&w=400'; }} className="max-h-full max-w-full object-contain group-hover:scale-110 transition-transform duration-500" alt={item.name} />
                 </div>
                 <div className="text-gray-900 font-bold text-[11px] md:text-xs hover:text-[#D4AF37] transition-colors line-clamp-2 h-8 leading-tight">{item.name}</div>
                 <div className="font-black text-[#1A1A1A] mt-2 text-sm">₹{item.price?.toLocaleString()}</div>
