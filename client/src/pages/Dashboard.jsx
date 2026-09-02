@@ -234,19 +234,19 @@ export default function Dashboard() {
                 <FiHeart className="text-red-500 fill-red-500" /> My Watchlist
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {user.watchlist && user.watchlist.length > 0 ? user.watchlist.map(item => (
+                {user.watchlist && user.watchlist.filter(item => item && item._id).length > 0 ? user.watchlist.filter(item => item && item._id).map(item => (
                   <Link to={`/auctions/${item._id}`} key={item._id} className="group flex gap-4 p-3 bg-gray-50 rounded-xl hover:bg-white border border-transparent hover:border-gray-200 transition-all shadow-sm">
-                    <img src={item.images[0]} className="w-20 h-20 object-cover rounded-lg" alt={item.name} />
+                    <img src={item.images?.[0] || 'https://via.placeholder.com/150'} className="w-20 h-20 object-cover rounded-lg" alt={item.name || ''} />
                     <div className="flex-1 overflow-hidden">
-                      <h4 className="font-bold text-gray-900 text-sm truncate group-hover:text-blue-600">{item.name}</h4>
-                      <p className="text-lg font-black text-gray-900 mt-1">₹{item.currentBid.toLocaleString()}</p>
+                      <h4 className="font-bold text-gray-900 text-sm truncate group-hover:text-blue-600">{item.name || 'Item'}</h4>
+                      <p className="text-lg font-black text-gray-900 mt-1">₹{item.currentBid?.toLocaleString() || 0}</p>
                       <p className="text-[10px] text-red-600 font-bold uppercase mt-1 flex items-center gap-1">
                         <FiClock /> {item.status === 'active' ? 'Ends Soon' : 'ENDED'}
                       </p>
                     </div>
                   </Link>
                 )) : (
-                  <div className="col-span-full py-12 text-center text-gray-400">
+                  <div className="col-span-full py-12 text-center text-gray-400 font-medium">
                     No items in watchlist. Start exploring!
                   </div>
                 )}
@@ -273,23 +273,31 @@ export default function Dashboard() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {bids.map(bid => (
-                      <tr key={bid._id} className="hover:bg-gray-50/50 transition-colors">
-                        <td className="px-6 py-4">
-                          <Link to={`/auctions/${bid.product._id}`} className="flex items-center gap-4">
-                            <img src={bid.product.images[0]} className="w-10 h-10 rounded border" alt="" />
-                            <span className="font-bold text-sm text-gray-900 hover:text-blue-600">{bid.product.name}</span>
-                          </Link>
-                        </td>
-                        <td className="px-6 py-4 text-center font-bold text-sm">₹{bid.amount.toLocaleString()}</td>
-                        <td className="px-6 py-4 text-center font-bold text-sm text-blue-600">₹{bid.product.currentBid.toLocaleString()}</td>
-                        <td className="px-6 py-4 text-right">
-                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase ${bid.amount >= bid.product.currentBid ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
-                            {bid.amount >= bid.product.currentBid ? 'Winning' : 'Outbid'}
-                          </span>
+                    {bids && bids.filter(bid => bid && bid.product).length > 0 ? (
+                      bids.filter(bid => bid && bid.product).map(bid => (
+                        <tr key={bid._id} className="hover:bg-gray-50/50 transition-colors">
+                          <td className="px-6 py-4">
+                            <Link to={`/auctions/${bid.product._id}`} className="flex items-center gap-4">
+                              <img src={bid.product.images?.[0] || 'https://via.placeholder.com/150'} className="w-10 h-10 rounded border object-cover" alt="" />
+                              <span className="font-bold text-sm text-gray-900 hover:text-blue-600">{bid.product.name}</span>
+                            </Link>
+                          </td>
+                          <td className="px-6 py-4 text-center font-bold text-sm">₹{bid.amount?.toLocaleString() || 0}</td>
+                          <td className="px-6 py-4 text-center font-bold text-sm text-blue-600">₹{bid.product.currentBid?.toLocaleString() || 0}</td>
+                          <td className="px-6 py-4 text-right">
+                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase ${(bid.amount || 0) >= (bid.product.currentBid || 0) ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
+                              {(bid.amount || 0) >= (bid.product.currentBid || 0) ? 'Winning' : 'Outbid'}
+                            </span>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="4" className="py-12 text-center text-gray-400 italic font-medium">
+                          No active bids found. Start exploring and bidding on live auctions!
                         </td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </table>
               </div>

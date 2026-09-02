@@ -1,0 +1,14 @@
+{
+  "watch": ["index.js", "routes/", "controllers/", "models/", "middleware/", "utils/"],
+  "ext": "js,json",
+  "ignore": [
+    "node_modules/",
+    "uploads/",
+    "invoices/",
+    "*.log",
+    "*.doc",
+    "*.docx",
+    "*.pdf"
+  ],
+  "delay": 1000
+}
