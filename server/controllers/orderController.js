@@ -98,7 +98,7 @@ exports.updateOrderStatus = async (req, res, next) => {
 exports.getInvoiceData = async (req, res, next) => {
     try {
         const order = await Order.findOne({ product: req.params.productId })
-            .populate('product', 'name currentBid status')
+            .populate('product', 'name images currentBid status')
             .populate('buyer', 'name email phone address avatar')
             .populate('seller', 'name email phone address avatar');
 

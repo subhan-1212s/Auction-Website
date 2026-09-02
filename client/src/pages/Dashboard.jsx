@@ -236,7 +236,7 @@ export default function Dashboard() {
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {user.watchlist && user.watchlist.filter(item => item && item._id).length > 0 ? user.watchlist.filter(item => item && item._id).map(item => (
                   <Link to={`/auctions/${item._id}`} key={item._id} className="group flex gap-4 p-3 bg-gray-50 rounded-xl hover:bg-white border border-transparent hover:border-gray-200 transition-all shadow-sm">
-                    <img src={item.images?.[0] || 'https://via.placeholder.com/150'} className="w-20 h-20 object-cover rounded-lg" alt={item.name || ''} />
+                    <img src={item.images?.[0] || 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&q=80&w=400'} className="w-20 h-20 object-cover rounded-lg" alt={item.name || ''} />
                     <div className="flex-1 overflow-hidden">
                       <h4 className="font-bold text-gray-900 text-sm truncate group-hover:text-blue-600">{item.name || 'Item'}</h4>
                       <p className="text-lg font-black text-gray-900 mt-1">₹{item.currentBid?.toLocaleString() || 0}</p>
@@ -278,7 +278,7 @@ export default function Dashboard() {
                         <tr key={bid._id} className="hover:bg-gray-50/50 transition-colors">
                           <td className="px-6 py-4">
                             <Link to={`/auctions/${bid.product._id}`} className="flex items-center gap-4">
-                              <img src={bid.product.images?.[0] || 'https://via.placeholder.com/150'} className="w-10 h-10 rounded border object-cover" alt="" />
+                              <img src={bid.product.images?.[0] || 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&q=80&w=400'} className="w-10 h-10 rounded border object-cover" alt="" />
                               <span className="font-bold text-sm text-gray-900 hover:text-blue-600">{bid.product.name}</span>
                             </Link>
                           </td>
@@ -313,7 +313,7 @@ export default function Dashboard() {
                 {orders.length > 0 ? orders.map(order => (
                   <div key={order._id} className="p-5 border border-gray-100 rounded-3xl hover:border-blue-100 hover:shadow-xl hover:shadow-blue-500/5 transition-all group overflow-hidden relative">
                     <div className="flex gap-5 relative z-10">
-                      <img src={order.product?.images[0]} className="w-20 h-20 object-cover rounded-2xl border border-gray-100" />
+                      <img src={order.product?.images?.[0] || 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&q=80&w=400'} className="w-20 h-20 object-cover rounded-2xl border border-gray-100" alt={order.product?.name || 'Order'} />
                       <div className="flex-1">
                         <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1">Order #{order._id.slice(-6).toUpperCase()}</p>
                         <h4 className="font-bold text-gray-900 text-sm mb-1 line-clamp-1">{order.product?.name}</h4>
@@ -379,7 +379,7 @@ export default function Dashboard() {
                 {soldOrders.length > 0 ? soldOrders.map(order => (
                   <div key={order._id} className="p-6 border border-gray-100 rounded-[2rem] hover:border-green-100 hover:shadow-2xl hover:shadow-green-500/5 transition-all bg-gray-50/30">
                     <div className="flex gap-6 mb-6">
-                      <img src={order.product?.images[0]} className="w-24 h-24 object-cover rounded-2xl border border-gray-100" />
+                      <img src={order.product?.images?.[0] || 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&q=80&w=400'} className="w-24 h-24 object-cover rounded-2xl border border-gray-100" alt={order.product?.name || 'Sale'} />
                       <div className="flex-1">
                         <div className="flex justify-between items-start">
                           <div>
@@ -471,7 +471,7 @@ export default function Dashboard() {
                 {myListings.length > 0 ? myListings.map(item => (
                   <div key={item._id} className="group border border-gray-100 rounded-3xl overflow-hidden hover:shadow-2xl hover:shadow-blue-500/5 transition-all bg-white flex flex-col">
                     <div className="relative aspect-[4/3] overflow-hidden">
-                      <img src={item.images[0]} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={item.name} />
+                      <img src={item.images?.[0] || 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&q=80&w=400'} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={item.name || 'Listing'} />
                       <div className="absolute top-4 right-4">
                         <span className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl ${item.status === 'active' ? 'bg-green-500 text-white' : 'bg-gray-800 text-white'
                           }`}>
