@@ -55,14 +55,18 @@ router.post('/login', async (req, res, next) => {
     user.otpExpires = otpExpires;
     await user.save();
 
-    // 5. Send OTP Email (Asynchronous - don't wait for it to finish)
+    // 5. Send OTP Email
     const sendEmail = require('../utils/sendEmail');
-    sendEmail({
-      email: user.email,
-      subject: 'Your Smart Auction Login OTP',
-      message: `Your OTP is ${otp}`,
-      otp: otp
-    }).catch(err => console.error('Background Email Failed:', err));
+    try {
+      await sendEmail({
+        email: user.email,
+        subject: 'Your Smart Auction Login OTP',
+        message: `Your OTP is ${otp}`,
+        otp: otp
+      });
+    } catch (emailErr) {
+      console.error('⚠️ OTP Email dispatch error:', emailErr.message);
+    }
 
     // 6. Response (Don't send token yet!)
     res.json({ 

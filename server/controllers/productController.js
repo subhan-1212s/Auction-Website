@@ -130,19 +130,23 @@ exports.createProduct = async (req, res, next) => {
     req.body.seller = req.user.id;
 
     // Handle images if uploaded via multer
-    if (req.files) {
+    if (req.files && req.files.length > 0) {
       const baseUrl = `${req.protocol}://${req.get('host')}`;
       req.body.images = req.files.map(file => {
         return `${baseUrl}/uploads/${file.filename}`;
       });
     }
 
-    // Map frontend naming to backend model
-    if (req.body.startingBid) {
-      req.body.startingPrice = req.body.startingBid;
-    }
+    // Map frontend naming to backend model with proper numeric & date parsing
+    const price = Number(req.body.startingBid || req.body.startingPrice || 0);
+    req.body.startingPrice = price;
+    req.body.currentBid = price;
+    req.body.status = 'active';
+
     if (req.body.expiryDate) {
-      req.body.endTime = req.body.expiryDate;
+      req.body.endTime = new Date(req.body.expiryDate);
+    } else if (req.body.endTime) {
+      req.body.endTime = new Date(req.body.endTime);
     }
 
     const product = await Product.create(req.body);
