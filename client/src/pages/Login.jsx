@@ -12,12 +12,10 @@ export default function Login() {
   const [step, setStep] = useState(1); // 1: Credentials, 2: OTP
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const { user, login, verifyOtp } = useContext(AuthContext);
+  const { user, login, verifyOtp, logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (user) navigate('/dashboard');
-  }, [user, navigate]);
+  // Don't auto-redirect immediately so user can switch accounts if desired
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -77,6 +75,19 @@ export default function Login() {
       {/* Right: Login Form */}
       <div className="flex-1 flex items-center justify-center p-8 lg:p-24 bg-gray-50">
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="w-full max-w-md">
+          {user && (
+            <div className="mb-8 p-4 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-between">
+              <div>
+                <p className="text-xs font-bold text-blue-900">Signed in as {user.email}</p>
+                <p className="text-[10px] text-blue-600 font-medium">Want to sign in as a different user?</p>
+              </div>
+              <div className="flex gap-2">
+                <button type="button" onClick={() => navigate('/dashboard')} className="px-3 py-1.5 bg-blue-600 text-white font-bold text-xs rounded-xl hover:bg-blue-700 transition-colors">Dashboard</button>
+                <button type="button" onClick={logout} className="px-3 py-1.5 bg-white text-red-600 border border-red-200 font-bold text-xs rounded-xl hover:bg-red-50 transition-colors">Sign Out</button>
+              </div>
+            </div>
+          )}
+
           <div className="mb-12">
             <h2 className="text-4xl font-black text-gray-900 tracking-tight">{step === 1 ? 'Sign In' : 'Security Check'}</h2>
             <p className="text-gray-500 font-medium mt-2">{step === 1 ? 'Access your personalized auction portal.' : `Enter the 6-digit OTP sent to ${email}`}</p>
