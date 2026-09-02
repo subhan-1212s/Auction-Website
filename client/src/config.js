@@ -9,10 +9,13 @@ const getApiBaseUrl = () => {
     return import.meta.env.VITE_API_BASE_URL;
   }
   if (isProduction) {
-    console.warn('⚠️ VITE_API_BASE_URL is missing in Vercel Environment Variables! Requests may fail.');
+    console.warn('⚠️ VITE_API_BASE_URL is missing in Vercel Environment Variables!');
     return '';
   }
-  return window.location.origin.replace('5173', '5000');
+  // In local development, reliably connect to backend on port 5000
+  const hostname = window.location.hostname || 'localhost';
+  const protocol = window.location.protocol || 'http:';
+  return `${protocol}//${hostname}:5000`;
 };
 
 export const API_BASE_URL = getApiBaseUrl();

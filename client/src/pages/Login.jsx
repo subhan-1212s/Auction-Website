@@ -40,7 +40,8 @@ export default function Login() {
         navigate('/dashboard');
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Authentication failed');
+      console.error('Login submit error:', error);
+      toast.error(error.response?.data?.message || error.message || 'Authentication failed');
     } finally {
       setIsSubmitting(false);
     }
