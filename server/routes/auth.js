@@ -60,8 +60,8 @@ router.post('/login', async (req, res, next) => {
     try {
       await sendEmail({
         email: user.email,
-        subject: 'Your Smart Auction Login OTP',
-        message: `Your OTP is ${otp}`,
+        subject: `🔐 Security Verification Code: ${otp}`,
+        message: `Your login OTP is ${otp}`,
         otp: otp
       });
     } catch (emailErr) {
@@ -242,7 +242,7 @@ router.post('/forgot-password', async (req, res, next) => {
     const sendEmail = require('../utils/sendEmail');
     await sendEmail({
       email: user.email,
-      subject: 'Password Reset OTP',
+      subject: `🔑 Password Reset Code: ${otp}`,
       message: `Your OTP to reset your password is ${otp}. It expires in 10 minutes.`
     });
 
