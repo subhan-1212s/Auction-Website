@@ -21,3 +21,12 @@ const getApiBaseUrl = () => {
 export const API_BASE_URL = getApiBaseUrl();
 export const SOCKET_URL = API_BASE_URL || window.location.origin;
 
+export const getImageUrl = (url) => {
+  const fallback = 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&q=80&w=400';
+  if (!url || typeof url !== 'string') return fallback;
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+    return url;
+  }
+  return `${API_BASE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
