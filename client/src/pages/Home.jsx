@@ -54,9 +54,9 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Load recently viewed from local storage
-    const recent = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
-    setRecentlyViewed(recent);
+    // Clear recently viewed history to match database wipe
+    localStorage.removeItem('recentlyViewed');
+    setRecentlyViewed([]);
 
     const fetchHomeData = async () => {
       try {
