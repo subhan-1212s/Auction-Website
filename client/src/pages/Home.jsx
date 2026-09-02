@@ -54,9 +54,9 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Clear recently viewed history to match database wipe
-    localStorage.removeItem('recentlyViewed');
-    setRecentlyViewed([]);
+    // Load recently viewed from local storage
+    const recent = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
+    setRecentlyViewed(recent);
 
     const fetchHomeData = async () => {
       try {
@@ -419,10 +419,11 @@ export default function Home() {
         )}
       </section>
 
-      {user && recentlyViewed.length > 0 && (
-        <section className="py-20 px-6 max-w-[1440px] mx-auto border-t border-gray-50">
-          <div className="flex justify-between items-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-luxury font-black text-gray-900 tracking-tighter">Recently Viewed</h2>
+      {/* 4. RECENTLY VIEWED SECTION */}
+      <section className="py-20 px-6 max-w-[1440px] mx-auto border-t border-gray-50">
+        <div className="flex justify-between items-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-luxury font-black text-gray-900 tracking-tighter">Recently Viewed</h2>
+          {recentlyViewed.length > 0 && (
             <button 
               onClick={() => {
                 localStorage.removeItem('recentlyViewed');
@@ -432,7 +433,10 @@ export default function Home() {
             >
               Clear History
             </button>
-          </div>
+          )}
+        </div>
+
+        {recentlyViewed.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-6 gap-6 md:gap-8">
             {recentlyViewed.map((item) => (
               <Link to={`/auctions/${item._id}`} key={item._id} className="group cursor-pointer flex flex-col">
@@ -444,8 +448,15 @@ export default function Home() {
               </Link>
             ))}
           </div>
-        </section>
-      )}
+        ) : (
+          <div className="bg-gray-50/50 border border-dashed border-gray-200 rounded-3xl p-12 text-center">
+            <p className="text-gray-400 font-bold text-sm mb-4">No recently viewed items yet.</p>
+            <Link to="/auctions" className="inline-block bg-[#1A1A1A] text-white px-6 py-2.5 rounded-full text-xs font-black uppercase tracking-widest hover:bg-[#D4AF37] transition-colors shadow-lg">
+              Explore Catalog →
+            </Link>
+          </div>
+        )}
+      </section>
 
       {/* 5. TRUST BANNER - Optimized stack */}
       <section className="bg-white border-t border-b border-gray-200 py-12">
