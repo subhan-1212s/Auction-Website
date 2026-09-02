@@ -1,20 +1,5 @@
 const nodemailer = require('nodemailer');
 
-const smtpEmail = process.env.SMTP_EMAIL || 'mohamedsubhan155@gmail.com';
-const smtpPassword = process.env.SMTP_PASSWORD || 'ykxn huad ageh eulr';
-
-// Reusable Transporter with Connection Pooling for Zero-Latency Sending
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  pool: true,
-  maxConnections: 5,
-  maxMessages: 100,
-  auth: {
-    user: smtpEmail,
-    pass: smtpPassword
-  }
-});
-
 const sendEmail = async (options) => {
   // Always log OTP in console for dev debugging / backup access
   if (options.otp) {
@@ -22,6 +7,9 @@ const sendEmail = async (options) => {
     console.log(`🔐 LOGIN OTP FOR ${options.email}: [ ${options.otp} ]`);
     console.log('==========================================\n');
   }
+
+  const smtpEmail = process.env.SMTP_EMAIL || 'mohamedsubhan155@gmail.com';
+  const smtpPassword = process.env.SMTP_PASSWORD || 'ykxn huad ageh eulr';
 
   const htmlTemplate = options.html || `
     <div style="font-family: Arial, sans-serif; max-width: 600px; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
@@ -37,16 +25,27 @@ const sendEmail = async (options) => {
   `;
 
   try {
-    await transporter.sendMail({
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: smtpEmail,
+        pass: smtpPassword
+      }
+    });
+
+    const info = await transporter.sendMail({
       from: `"Smart Auction" <${smtpEmail}>`,
       to: options.email,
       subject: options.subject,
       text: options.message,
       html: htmlTemplate
     });
-    console.log(`✅ Instant pooled email sent via Gmail SMTP directly to ${options.email}`);
+
+    console.log(`✅ Email sent via Gmail SMTP to ${options.email} (ID: ${info.messageId})`);
+    return info;
   } catch (err) {
-    console.error(`❌ Gmail SMTP Email Dispatch Failed (${err.message}).`);
+    console.error(`❌ Gmail SMTP Error (${err.message}).`);
+    throw err;
   }
 };
 
