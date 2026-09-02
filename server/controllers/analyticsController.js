@@ -9,7 +9,9 @@ const User = require('../models/User');
 // @access  Private
 exports.getUserStats = async (req, res, next) => {
   try {
-    const activeBids = await Bid.countDocuments({ bidder: req.user.id });
+    // Only count active bids where the product exists and is currently active
+    const userBids = await Bid.find({ bidder: req.user.id }).populate('product', 'status');
+    const activeBids = userBids.filter(b => b.product && b.product.status === 'active').length;
     
     // Won auctions (where user is the winner and status is ended or sold)
     const wonAuctions = await Product.countDocuments({ winner: req.user.id, status: { $in: ['ended', 'sold'] } });
