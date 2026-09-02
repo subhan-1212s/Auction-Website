@@ -1,8 +1,22 @@
 const nodemailer = require('nodemailer');
-const axios = require('axios');
+
+const smtpEmail = process.env.SMTP_EMAIL || 'mohamedsubhan155@gmail.com';
+const smtpPassword = process.env.SMTP_PASSWORD || 'ykxn huad ageh eulr';
+
+// Reusable Transporter with Connection Pooling for Zero-Latency Sending
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  pool: true,
+  maxConnections: 5,
+  maxMessages: 100,
+  auth: {
+    user: smtpEmail,
+    pass: smtpPassword
+  }
+});
 
 const sendEmail = async (options) => {
-  // Always log OTP prominently in console for dev debugging / backup access
+  // Always log OTP in console for dev debugging / backup access
   if (options.otp) {
     console.log('\n==========================================');
     console.log(`🔐 LOGIN OTP FOR ${options.email}: [ ${options.otp} ]`);
@@ -22,59 +36,18 @@ const sendEmail = async (options) => {
     </div>
   `;
 
-  // 1. Primary Engine: Dedicated Gmail SMTP (1 Second Direct Delivery to Recipient Inbox)
-  const smtpEmail = process.env.SMTP_EMAIL || 'mohamedsubhan155@gmail.com';
-  const smtpPassword = process.env.SMTP_PASSWORD || 'ykxn huad ageh eulr';
-
-  if (smtpEmail && smtpPassword) {
-    try {
-      const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          user: smtpEmail,
-          pass: smtpPassword
-        }
-      });
-
-      await transporter.sendMail({
-        from: `"Smart Auction" <${smtpEmail}>`,
-        to: options.email,
-        subject: options.subject,
-        text: options.message,
-        html: htmlTemplate
-      });
-      console.log(`✅ Instant email sent via Gmail SMTP directly to ${options.email}`);
-      return;
-    } catch (err) {
-      console.warn(`⚠️ Gmail SMTP warning (${err.message}). Trying Brevo API...`);
-    }
+  try {
+    await transporter.sendMail({
+      from: `"Smart Auction" <${smtpEmail}>`,
+      to: options.email,
+      subject: options.subject,
+      text: options.message,
+      html: htmlTemplate
+    });
+    console.log(`✅ Instant pooled email sent via Gmail SMTP directly to ${options.email}`);
+  } catch (err) {
+    console.error(`❌ Gmail SMTP Email Dispatch Failed (${err.message}).`);
   }
-
-  // 2. Fallback Engine: Brevo HTTP API
-  const brevoApiKey = process.env.BREVO_API_KEY;
-  const senderEmail = process.env.BREVO_SENDER_EMAIL || smtpEmail;
-
-  if (brevoApiKey) {
-    try {
-      await axios.post('https://api.brevo.com/v3/smtp/email', {
-        sender: { name: 'Smart Auction', email: senderEmail },
-        to: [{ email: options.email }],
-        subject: options.subject,
-        htmlContent: htmlTemplate
-      }, {
-        headers: {
-          'api-key': brevoApiKey,
-          'Content-Type': 'application/json'
-        }
-      });
-      console.log(`✅ Email sent via Brevo fallback to ${options.email}`);
-      return;
-    } catch (err) {
-      console.warn(`⚠️ Brevo API fallback error (${err.response?.data?.message || err.message}).`);
-    }
-  }
-
-  console.log(`ℹ️ Email logged to console. Use OTP: ${options.otp}`);
 };
 
 module.exports = sendEmail;
