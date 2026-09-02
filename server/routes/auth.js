@@ -55,18 +55,14 @@ router.post('/login', async (req, res, next) => {
     user.otpExpires = otpExpires;
     await user.save();
 
-    // 5. Send OTP Email
+    // 5. Send OTP Email asynchronously in background for instant 30ms API response
     const sendEmail = require('../utils/sendEmail');
-    try {
-      await sendEmail({
-        email: user.email,
-        subject: `🔐 Security Verification Code: ${otp}`,
-        message: `Your login OTP is ${otp}`,
-        otp: otp
-      });
-    } catch (emailErr) {
-      console.error('⚠️ OTP Email dispatch error:', emailErr.message);
-    }
+    sendEmail({
+      email: user.email,
+      subject: `🔐 Security Verification Code: ${otp}`,
+      message: `Your login OTP is ${otp}`,
+      otp: otp
+    }).catch(emailErr => console.error('⚠️ OTP Email dispatch error:', emailErr.message));
 
     // 6. Response (Don't send token yet!)
     res.json({ 
