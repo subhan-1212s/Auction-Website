@@ -212,8 +212,8 @@ export default function CreateAuction() {
               <div className="space-y-6">
                 <div>
                   <label className="text-[10px] uppercase font-black text-gray-400 tracking-widest mb-2 block">Category</label>
-                  <select name="category" className="w-full px-5 py-4 rounded-2xl border border-gray-100 bg-gray-50 font-bold outline-none cursor-pointer" value={formData.category} onChange={handleChange}>
-                    {['Watches', 'Electronics', 'Fashion', 'Motors', 'Collectibles', 'Art', 'Sports', 'Jewelry', 'Home & Garden'].map(c => <option key={c}>{c}</option>)}
+                  <select name="category" className="w-full px-5 py-4 rounded-2xl border border-gray-100 bg-gray-50 font-bold outline-none cursor-pointer text-gray-900" value={formData.category} onChange={handleChange}>
+                    {['Electronics', 'Fashion', 'Motors', 'Watches', 'Collectibles', 'Art', 'Sports'].map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
                 <div>
