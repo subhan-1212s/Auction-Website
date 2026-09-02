@@ -74,12 +74,11 @@ io.on('connection', (socket) => {
   });
 });
 
-// Cron Jobs
+// Fast Real-Time Auction Expiry Checker (Runs every 2 seconds for zero-delay detection)
 const { checkEndedAuctions } = require('./routes/bids');
-cron.schedule('* * * * *', () => {
-    console.log('Running auction checker...');
+setInterval(() => {
     checkEndedAuctions(io);
-});
+}, 2000);
 
 // Error Handler Middleware (Must be after routes)
 const errorHandler = require('./middleware/error');

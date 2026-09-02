@@ -91,58 +91,63 @@ exports.checkEndedAuctions = async (io) => {
       product.status = 'ended';
       await product.save();
 
-        if (product.winner) {
-        // Notify Winner
-        const existingWinnerNotif = await Notification.findOne({ user: product.winner._id, type: 'auction_won', product: product._id });
-        let winnerNotif;
-        if (!existingWinnerNotif) {
+      if (product.winner) {
+        // Notify Winner (In-App)
+        let winnerNotif = await Notification.findOne({ user: product.winner._id, type: 'auction_won', product: product._id });
+        if (!winnerNotif) {
           winnerNotif = await Notification.create({
             user: product.winner._id,
             type: 'auction_won',
-            message: `Congratulations! You won the auction for "${product.name}" with a bid of ₹${product.currentBid}`,
+            message: `🏆 Congratulations! You won the auction for "${product.name}" with a winning bid of ₹${product.currentBid.toLocaleString('en-IN')}. Click to checkout!`,
             product: product._id
           });
         }
 
-        // Notify Seller
-        const existingSellerNotif = await Notification.findOne({ user: product.seller, type: 'auction_ended', product: product._id });
-        let sellerNotif;
-        if (!existingSellerNotif) {
+        // Notify Seller (In-App)
+        let sellerNotif = await Notification.findOne({ user: product.seller, type: 'auction_ended', product: product._id });
+        if (!sellerNotif) {
           sellerNotif = await Notification.create({
             user: product.seller,
             type: 'auction_ended',
-            message: `Your auction for "${product.name}" has ended. Winner: ${product.winner.name}`,
+            message: `🎉 Your auction for "${product.name}" has completed! Winning bid: ₹${product.currentBid.toLocaleString('en-IN')} by ${product.winner.name}`,
             product: product._id
           });
         }
 
-        // Email Winner
-        await sendEmail({
+        // Email Winner (Async background dispatch for instant zero delay)
+        sendEmail({
           email: product.winner.email,
-          subject: '🏆 You Won the Auction!',
-          message: `Congratulations! You won the auction for "${product.name}". The final bid was ₹${product.currentBid.toLocaleString()}.`
-        });
+          subject: `🏆 YOU WON! Auction Winner for "${product.name}"`,
+          message: `Congratulations ${product.winner.name}! You won the auction for "${product.name}". Your winning bid was ₹${product.currentBid.toLocaleString('en-IN')}. Please log in to complete your checkout and payment.`
+        }).catch(err => console.error('Winner email dispatch error:', err.message));
 
-        // Emit via Socket
+        // Emit Instant Real-Time Socket Events
         if (io) {
-          // Room for product updates
           io.to(`product_${product._id}`).emit('auction_ended', {
             productId: product._id,
-            winner: product.winner.name
+            winner: { _id: product.winner._id, name: product.winner.name }
           });
 
-          // Room for personal notifications
           io.to(`user_${product.winner._id}`).emit('notification', winnerNotif);
+          io.to(`user_${product.winner._id}`).emit('cart_update');
           io.to(`user_${product.seller}`).emit('notification', sellerNotif);
         }
       } else {
         // No bids - notify seller
-        await Notification.create({
+        const noBidNotif = await Notification.create({
           user: product.seller,
           type: 'auction_ended',
           message: `Your auction for "${product.name}" has ended with no bids.`,
           product: product._id
         });
+
+        if (io) {
+          io.to(`product_${product._id}`).emit('auction_ended', {
+            productId: product._id,
+            winner: null
+          });
+          io.to(`user_${product.seller}`).emit('notification', noBidNotif);
+        }
       }
     }
   } catch (err) {

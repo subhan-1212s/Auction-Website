@@ -56,10 +56,16 @@ export default function ProductDetails() {
             }
         });
 
-        socketRef.current.on('auction_ended', ({ productId, winner }) => {
+        socketRef.current.on('auction_ended', async ({ productId }) => {
             if (productId === id) {
-                setProduct(prev => ({ ...prev, status: 'ended', winner }));
-                toast.success(`Auction Ended! ${winner ? 'We have a winner!' : 'No bids placed.'}`, { duration: 5000 });
+                try {
+                    const res = await axios.get(`/api/products/${id}`);
+                    setProduct(res.data.data);
+                    fetchBids();
+                    toast.success('🏆 Auction Ended! Winner confirmed.', { duration: 5000 });
+                } catch (err) {
+                    console.error('Error re-fetching product on end:', err);
+                }
             }
         });
 
@@ -111,9 +117,15 @@ export default function ProductDetails() {
                 setTimeLeft('ENDED');
                 clearInterval(interval);
                 
-                // Immediately force the backend to resolve the auction without waiting for cron
+                // Immediately force the backend to resolve the auction without waiting
                 if (product.status === 'active') {
-                    axios.post(`/api/bids/product/${product._id}/resolve`).catch(err => console.error(err));
+                    axios.post(`/api/bids/product/${product._id}/resolve`)
+                        .then(async () => {
+                            const res = await axios.get(`/api/products/${id}`);
+                            setProduct(res.data.data);
+                            fetchBids();
+                        })
+                        .catch(err => console.error(err));
                 }
             } else {
                 const h = Math.floor(diff / 3600000);
