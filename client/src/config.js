@@ -24,9 +24,16 @@ export const SOCKET_URL = API_BASE_URL || window.location.origin;
 export const getImageUrl = (url) => {
   const fallback = 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&q=80&w=400';
   if (!url || typeof url !== 'string') return fallback;
-  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
-    return url;
+  
+  let cleanUrl = url.trim();
+  // Upgrade http:// to https:// to prevent Mixed Content security blocking on Vercel
+  if (cleanUrl.startsWith('http://')) {
+    cleanUrl = cleanUrl.replace('http://', 'https://');
   }
-  return `${API_BASE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+
+  if (cleanUrl.startsWith('https://') || cleanUrl.startsWith('data:')) {
+    return cleanUrl;
+  }
+  return `${API_BASE_URL}${cleanUrl.startsWith('/') ? '' : '/'}${cleanUrl}`;
 };
 

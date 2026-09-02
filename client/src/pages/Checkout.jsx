@@ -61,7 +61,7 @@ const FullScreenSuccess = ({ product, navigate }) => {
             <div className="bg-white rounded-3xl p-6 md:p-8 border border-gray-100 shadow-xl shadow-gray-200/20">
               <div className="flex gap-4 md:gap-6 mb-6 md:mb-8">
                 <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 shrink-0">
-                  <img src={getImageUrl(product?.images?.[0])} className="w-full h-full object-cover" alt={product?.name || 'Product'} />
+                  <img src={getImageUrl(product?.images?.[0])} onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&q=80&w=400'; }} className="w-full h-full object-cover" alt={product?.name || 'Product'} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h4 className="font-black text-gray-900 mb-1 leading-tight truncate">{product.name}</h4>
