@@ -37,14 +37,21 @@ import AuthContext from './context/AuthContext'
 const ProtectedRoute = ({ children, roles = [] }) => {
   const { user, loading } = useContext(AuthContext)
 
-  if (loading) return <div className="p-10 text-center">Loading...</div>
-  if (!user) return <Navigate to="/login" />
-  if (roles.length > 0 && !roles.includes(user.role) && user.role !== 'admin') {
-    return <Navigate to="/" />
+  if (loading && !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Authenticating...</p>
+        </div>
+      </div>
+    );
   }
 
-  // Removed forced complete profile redirection from protected routes globally.
-  // Profile completion will solely be enforced during bidding or specific actions.
+  if (!user) return <Navigate to="/login" replace />
+  if (roles.length > 0 && !roles.includes(user.role) && user.role !== 'admin') {
+    return <Navigate to="/" replace />
+  }
 
   return children
 }

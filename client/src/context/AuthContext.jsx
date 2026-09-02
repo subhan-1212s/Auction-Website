@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       try {
-        setLoading(true);
+        if (!user) setLoading(true);
         const res = await axios.get('/api/auth/me');
         if (res.data.success) {
           const userData = res.data.data;
