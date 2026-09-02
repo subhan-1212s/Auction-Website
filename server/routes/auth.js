@@ -10,20 +10,21 @@ const router = express.Router();
 router.post('/register', async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
+    const cleanEmail = email ? email.toLowerCase().trim() : '';
     
     // AI-Lite Fake User Detection
     const { detectFakeUser } = require('../utils/smartValidator');
-    const validationResult = detectFakeUser(name, email);
+    const validationResult = detectFakeUser(name, cleanEmail);
     
     if (!validationResult.isValid) {
       return next(new ErrorResponse(validationResult.reason, 400));
     }
 
-    let user = await User.findOne({ email });
+    let user = await User.findOne({ email: cleanEmail });
     if (user) return next(new ErrorResponse('User already exists', 400));
     
     const hashedPassword = await bcrypt.hash(password, 10);
-    user = await User.create({ name, email, password: hashedPassword });
+    user = await User.create({ name, email: cleanEmail, password: hashedPassword });
 
     res.status(201).json({ success: true, message: 'User registered successfully' });
   } catch (err) {
@@ -35,9 +36,10 @@ router.post('/register', async (req, res, next) => {
 router.post('/login', async (req, res, next) => {
   try {
     const { email, password } = req.body;
+    const cleanEmail = email ? email.toLowerCase().trim() : '';
     
     // 1. Check User
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ email: cleanEmail }).select('+password');
     if (!user) return next(new ErrorResponse('Invalid credentials', 401));
 
     // 2. Check Password
