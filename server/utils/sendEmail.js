@@ -1,8 +1,7 @@
 const nodemailer = require('nodemailer');
-const axios = require('axios');
 
 const sendEmail = async (options) => {
-  // Always log OTP prominently in console for dev debugging / backup access
+  // Always log OTP in console for developer fallback / debugging
   if (options.otp) {
     console.log('\n==========================================');
     console.log(`🔐 LOGIN OTP FOR ${options.email}: [ ${options.otp} ]`);
@@ -22,54 +21,31 @@ const sendEmail = async (options) => {
     </div>
   `;
 
-  // 1. Try Gmail Nodemailer SMTP (Primary - 1 Second Instant Delivery to Any Recipient)
-  if (process.env.SMTP_EMAIL && process.env.SMTP_PASSWORD) {
-    try {
-      const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          user: process.env.SMTP_EMAIL,
-          pass: process.env.SMTP_PASSWORD
-        }
-      });
+  // Dedicated Gmail SMTP Transporter
+  const smtpEmail = process.env.SMTP_EMAIL || 'mohamedsubhan155@gmail.com';
+  const smtpPassword = process.env.SMTP_PASSWORD || 'ykxn huad ageh eulr';
 
-      await transporter.sendMail({
-        from: `"Smart Auction" <${process.env.SMTP_EMAIL}>`,
-        to: options.email,
-        subject: options.subject,
-        text: options.message,
-        html: htmlTemplate
-      });
-      console.log(`✅ Instant 1-second email sent via Gmail SMTP to ${options.email}`);
-      return;
-    } catch (err) {
-      console.warn(`⚠️ Gmail SMTP failed (${err.message}). Trying Brevo API...`);
-    }
+  try {
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: smtpEmail,
+        pass: smtpPassword
+      }
+    });
+
+    await transporter.sendMail({
+      from: `"Smart Auction" <${smtpEmail}>`,
+      to: options.email,
+      subject: options.subject,
+      text: options.message,
+      html: htmlTemplate
+    });
+
+    console.log(`✅ Instant email sent via SMTP to ${options.email}`);
+  } catch (err) {
+    console.error(`❌ SMTP Email Dispatch Failed (${err.message}).`);
   }
-
-  // 2. Try Brevo HTTP API (Fallback)
-  if (process.env.BREVO_API_KEY) {
-    try {
-      const senderEmail = process.env.BREVO_SENDER_EMAIL || 'mohamedsubhan155@gmail.com';
-      await axios.post('https://api.brevo.com/v3/smtp/email', {
-        sender: { name: 'Smart Auction', email: senderEmail },
-        to: [{ email: options.email }],
-        subject: options.subject,
-        htmlContent: htmlTemplate
-      }, {
-        headers: {
-          'api-key': process.env.BREVO_API_KEY,
-          'Content-Type': 'application/json'
-        }
-      });
-      console.log(`✅ Real email sent via Brevo to ${options.email}`);
-      return;
-    } catch (err) {
-      console.warn(`⚠️ Brevo API Error (${err.response?.data?.message || err.message}).`);
-    }
-  }
-
-  console.log(`ℹ️ Real email provider unavailable. Use the OTP printed above in the terminal: ${options.otp}`);
 };
 
 module.exports = sendEmail;
